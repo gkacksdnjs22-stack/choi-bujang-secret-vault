@@ -53,4 +53,4 @@ Supabase Auth 공식 SDK의 이메일·비밀번호 로그인 및 로그아웃�
 DB의 기존 숫자 ID와 가상 자료를 보존하고 public_id UUID를 추가했습니다. POST /api/notes는 {id,title,body}를 받으며 ID 생략 시 UUID를 생성합니다. GET·PUT·DELETE /api/notes/:id를 지원하고 삭제된 자료 조회는 404입니다.
 
 실행: node scripts/check-step3.mjs
-확인 결과: 무로그인 GET·POST·PUT·DELETE와 잘못된 토큰은 모두 401입니다. 정상 A 계정 로그인·로그아웃 및 실제 추가·수정·삭제 검증은 아직 미실행입니다. 3단계 배포와 제출도 아직 미실행입니다. Supabase Auth 사용자 화면에서 실습 계정을 준비한 뒤 정상 흐름을 검증해야 합니다.
+확인 결과: 무로그인 GET·POST·PUT·DELETE와 잘못된 토큰은 모두 401입니다. 정상 A 계정 로그인과 실제 메모 추가·수정·삭제를 화면에서 확인했습니다. 수정 후 새로고침해 저장 상태를 확인했습니다. 3단계 배포는 완료했고 제출은 아직 미실행입니다. Supabase Auth 사용자 화면에서 실습 계정을 준비한 뒤 정상 흐름을 검증해야 합니다.
