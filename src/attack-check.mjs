@@ -1,31 +1,20 @@
-// The student changes this check as each stage adds an attack to the same app.
-// Never return tokens, private keys, real names, or note bodies.
+// Self-check results only: these do not represent the operating judge's verdict.
 export async function runAttackChecks(config) {
-  if (config.step !== 1) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
-  let app;
-  try {
-    app = new URL(config.publicAppUrl);
-  } catch {
-    throw new Error('aleph.config.json의 실제 배포 주소를 먼저 넣어 주세요.');
+  const app = new URL(config.publicAppUrl);
+  if (app.protocol !== 'https:' || app.hostname.endsWith('.example')) throw new Error('실제 배포 주소가 필요합니다.');
+  const request = path => fetch(new URL(path, app), { redirect: 'error', signal: AbortSignal.timeout(10000) });
+  const json = await request('/data.json');
+  let staticEmpty = false;
+  if (json.ok) {
+    try { const value = await json.json(); staticEmpty = Array.isArray(value.notes) && value.notes.length === 0; } catch {}
   }
-  if (app.protocol !== 'https:' || app.username || app.password || app.search || app.hash
-      || app.pathname !== '/' || app.hostname.endsWith('.example')) {
-    throw new Error('aleph.config.json의 실제 배포 주소를 먼저 넣어 주세요.');
+  const api = await request('/api/notes');
+  let four = false;
+  if (api.ok) {
+    try { const value = await api.json(); four = Array.isArray(value.notes) && value.notes.length === 4; } catch {}
   }
-  if (typeof config.sampleMarker !== 'string' || !config.sampleMarker) throw new Error('가상 메모의 확인 표시를 넣어 주세요.');
-  const response = await fetch(new URL('/data.json', app), {
-    redirect: 'error', signal: AbortSignal.timeout(10000),
-  });
-  let visible = false;
-  if (response.ok) {
-    try {
-      const data = await response.json();
-      visible = data?.sampleMarker === config.sampleMarker && Array.isArray(data.notes)
-        && data.notes.length > 0;
-    } catch {
-      // A non-JSON response is a failed check, not a successful deployment.
-    }
-  }
-  return [{ attackId: 'anonymous_note_read', expected: '비로그인 화면에서 가상 메모를 확인',
-    observed: visible ? '비로그인 요청에서 공개 가상 메모 확인 표시가 보임' : `비로그인 요청에서 확인 표시가 보이지 않음 (HTTP ${response.status})` }];
+  return [
+    { attackId: 'static_note_seed', expected: '공개 정적 JSON에 메모 본문 없음', observed: staticEmpty ? '공개 JSON의 메모 배열이 비어 있음' : `미확인 (HTTP ${json.status})` },
+    { attackId: 'server_note_read', expected: '서버 API에서 가상 자료 네 건 조회', observed: four ? '공개 서버 API에서 자료 네 건 확인; 인증은 아직 없음' : `미확인 (HTTP ${api.status})` },
+  ];
 }
