@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const shape = row => ({id:row.public_id,title:row.title,body:row.content});
     if (req.method === 'GET') {
       let query = db.from('notes').select('public_id,title,content');
-      if(id) query=query.eq('public_id',id).maybeSingle();
+      if(id) query=query.eq('public_id',id).eq('owner_id',identity.userId).maybeSingle();
       else query=query.eq('owner_id',identity.userId).order('id');
       const {data,error}=await query;
       if(error) return res.status(502).json({error:'자료 조회에 실패했습니다.'});
@@ -30,11 +30,12 @@ export default async function handler(req, res) {
     if (!['POST','PUT','DELETE'].includes(req.method)) {res.setHeader('Allow','GET, POST, PUT, DELETE');return res.status(405).json({error:'지원하지 않는 요청입니다.'});}
     if (req.method !== 'POST' && !id) return res.status(400).json({error:'메모 ID가 필요합니다.'});
     if (req.method === 'DELETE') {
-      const {data,error}=await db.from('notes').delete().eq('public_id',id).select('public_id').maybeSingle();
+      const {data,error}=await db.from('notes').delete().eq('public_id',id).eq('owner_id',identity.userId).select('public_id').maybeSingle();
       if(error)return res.status(502).json({error:'삭제에 실패했습니다.'});
       return data?res.status(200).json({id}):res.status(404).json({error:'메모가 없습니다.'});
     }
     const body=typeof req.body==='string'?JSON.parse(req.body):req.body;
+    if (body && Object.hasOwn(body,'owner_id')) return res.status(400).json({error:'소유자는 서버에서 결정합니다.'});
     if(typeof body?.title!=='string'||typeof body?.body!=='string'||!body.title.trim()||body.title.length>200||body.body.length>10000)return res.status(400).json({error:'제목과 본문을 확인하세요.'});
     if(req.method==='POST') {
       const newId=body.id??randomUUID();
@@ -42,8 +43,8 @@ export default async function handler(req, res) {
       const {error}=await db.from('notes').insert({public_id:newId,owner_id:identity.userId,title:body.title,content:body.body});
       return error?res.status(409).json({error:'메모 추가에 실패했습니다.'}):res.status(201).json({id:newId});
     }
-    // Ownership restrictions for item routes are deliberately introduced in step 4.
-    const {data,error}=await db.from('notes').update({title:body.title,content:body.body}).eq('public_id',id).select('public_id,title,content').maybeSingle();
+    // Check ownership in the same query as the write; the owner cannot be changed.
+    const {data,error}=await db.from('notes').update({title:body.title,content:body.body}).eq('public_id',id).eq('owner_id',identity.userId).select('public_id,title,content').maybeSingle();
     if(error)return res.status(502).json({error:'수정에 실패했습니다.'});
     return data?res.status(200).json(shape(data)):res.status(404).json({error:'메모가 없습니다.'});
   } catch {return res.status(500).json({error:'요청을 처리할 수 없습니다.'});}
