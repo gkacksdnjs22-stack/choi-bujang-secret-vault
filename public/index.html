@@ -35,6 +35,20 @@ input,textarea{background:#eff8fd}
 .note-card .note-delete{background:#f8eef2;color:#956f80;border-color:#ecdae3}
 .note-card .note-edit{background:#eaf3f8;color:#5d7f94;border-color:#dbe9f2}
 .note-card .note-actions button:first-child{background:#ead9e2;color:#775b6b;border-color:#dec8d4}
+/* Sky background, blush cards, white writing surfaces. */
+body{background:linear-gradient(135deg,#bee2f8 0%,#d9effc 48%,#bcdff3 100%);background-attachment:fixed}
+section{background:linear-gradient(145deg,#fff4f7 0%,#f9e7ef 58%,#f3dfe9 100%);border-color:#fff6fa;box-shadow:0 14px 40px #567d9612}
+input,textarea{background:#ffffff;border-color:#e5dae3;color:#324e5d}
+input:focus,textarea:focus{background:#ffffff;border-color:#94c4df;box-shadow:0 0 0 3px #a7d7f32b}
+button,#newNote>button,#loginForm>button,.note-card .note-actions button:first-child{background:linear-gradient(135deg,#b4def5,#cceafa);border-color:#a8cfe5;color:#355f78}
+button:hover,#newNote>button:hover,#loginForm>button:hover{background:linear-gradient(135deg,#a6d5f0,#bee3f7)}
+#logout,.note-card .note-edit,.note-card .note-cancel,.note-card .note-delete{background:#d0eafa;border-color:#b5d7ec;color:#52758b}
+.note-card{background:#fff;border-color:#eedde6}
+.note-card .note-title{background:transparent;border:0;color:#3b5969}
+.note-card .note-title:hover{background:#eef8fd}
+.note-body{border-top-color:#eee4e9}
+#newNote{border-bottom-color:#e7d5df}
+#account{background:#d9edf8;color:#52788e}
 </style></head><body><main><p>BYTE BACK · 3단계</p><h1>로그인 자료실</h1><p>가상 자료만 사용하세요. 로그인 후 내 메모를 추가·수정·삭제할 수 있습니다.</p><section id="login"><form id="loginForm"><label>이메일<input id="email" type="email" autocomplete="username" required></label><label>비밀번호<input id="password" type="password" autocomplete="current-password" required></label><button>로그인</button></form></section><p id="status" role="status"></p><section id="workspace" hidden><p id="account"></p><button id="logout">로그아웃</button><form id="newNote"><label>제목<input id="title" maxlength="200" required></label><label>본문<textarea id="body" maxlength="10000" required></textarea></label><button>메모 추가</button></form><div id="notes"></div></section><small>과거 공개 커밋·배포는 남아 있습니다. 다른 사용자의 메모 ID에 대한 소유자 검사는 다음 단계에서 추가합니다.</small></main><script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.117.2';
 const auth=createClient('https://mhcjrsyvngiokcoljeet.supabase.co','sb_publishable_PbVmslCPDL1I4fei6avE8Q_wWDTOHv-');
