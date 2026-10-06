@@ -24,7 +24,18 @@ button:hover{background:#b7d9e9;filter:none}
 .note-card .note-actions button:first-child{background:#c2e0ee;color:#345e72;border-color:#b3d3e1}
 .note-body{color:#627c8b;border-top-color:#e6edf0;font-size:14px}
 small{color:#8398a4;font-size:11px;line-height:1.9}
-@media(max-width:540px){main{padding-top:36px}section{padding:24px}}</style></head><body><main><p>BYTE BACK · 3단계</p><h1>로그인 자료실</h1><p>가상 자료만 사용하세요. 로그인 후 내 메모를 추가·수정·삭제할 수 있습니다.</p><section id="login"><form id="loginForm"><label>이메일<input id="email" type="email" autocomplete="username" required></label><label>비밀번호<input id="password" type="password" autocomplete="current-password" required></label><button>로그인</button></form></section><p id="status" role="status"></p><section id="workspace" hidden><p id="account"></p><button id="logout">로그아웃</button><form id="newNote"><label>제목<input id="title" maxlength="200" required></label><label>본문<textarea id="body" maxlength="10000" required></textarea></label><button>메모 추가</button></form><div id="notes"></div></section><small>과거 공개 커밋·배포는 남아 있습니다. 다른 사용자의 메모 ID에 대한 소유자 검사는 다음 단계에서 추가합니다.</small></main><script type="module">
+@media(max-width:540px){main{padding-top:36px}section{padding:24px}}/* Sky, blush and white: restrained accents across quiet surfaces. */
+body{background:radial-gradient(ellipse at 90% 10%,#f3e5eb 0%,transparent 48%),linear-gradient(140deg,#e1eef5,#edf3f6 60%,#e7eff5);background-attachment:fixed}
+section{background:#fcfdfd;border:1px solid #ffffffbd;box-shadow:0 14px 42px #637c9510}
+#newNote>button,#loginForm>button{background:#ead9e2;border-color:#dec8d4;color:#775b6b}
+#newNote>button:hover,#loginForm>button:hover{background:#e4ceda}
+#account{display:inline-block;background:#e7f1f6;color:#5d7d91;border-radius:20px;padding:6px 12px}
+input,textarea{background:#f2f7fa}
+.note-card{background:#fff;border-color:#e3eaf0}
+.note-card .note-delete{background:#f8eef2;color:#956f80;border-color:#ecdae3}
+.note-card .note-edit{background:#eaf3f8;color:#5d7f94;border-color:#dbe9f2}
+.note-card .note-actions button:first-child{background:#ead9e2;color:#775b6b;border-color:#dec8d4}
+</style></head><body><main><p>BYTE BACK · 3단계</p><h1>로그인 자료실</h1><p>가상 자료만 사용하세요. 로그인 후 내 메모를 추가·수정·삭제할 수 있습니다.</p><section id="login"><form id="loginForm"><label>이메일<input id="email" type="email" autocomplete="username" required></label><label>비밀번호<input id="password" type="password" autocomplete="current-password" required></label><button>로그인</button></form></section><p id="status" role="status"></p><section id="workspace" hidden><p id="account"></p><button id="logout">로그아웃</button><form id="newNote"><label>제목<input id="title" maxlength="200" required></label><label>본문<textarea id="body" maxlength="10000" required></textarea></label><button>메모 추가</button></form><div id="notes"></div></section><small>과거 공개 커밋·배포는 남아 있습니다. 다른 사용자의 메모 ID에 대한 소유자 검사는 다음 단계에서 추가합니다.</small></main><script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.117.2';
 const auth=createClient('https://mhcjrsyvngiokcoljeet.supabase.co','sb_publishable_PbVmslCPDL1I4fei6avE8Q_wWDTOHv-');
 const $=id=>document.getElementById(id); let session=null;
