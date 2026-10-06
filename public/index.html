@@ -89,7 +89,7 @@ function noteCard(note) {
   remove.onclick=async()=>{try{await api('/'+note.id,'DELETE');await load();message('삭제했습니다.')}catch(e){message(e.message)}};
   actions.append(save,cancel);form.append(title,body,actions);row.append(heading,edit,remove);detail.append(text);card.append(row,detail,form);return card;
 }
-async function load(){try{const notes=await api();$('notes').replaceChildren(...notes.map(noteCard));if(!notes.length)message('아직 내 메모가 없습니다. 가상 메모를 추가해 주세요.')}catch(e){message(e.message)}}
+async function load(){try{const notes=await api();$('notes').replaceChildren(...notes.map(noteCard));message(notes.length?'':'아직 내 메모가 없습니다. 가상 메모를 추가해 주세요.')}catch(e){message(e.message)}}
 async function render(next){session=next;$('login').hidden=!!session;$('workspace').hidden=!session;$('notes').replaceChildren();if(session){$('account').textContent='로그인 완료';await load()}else{message('로그인 후 자료를 볼 수 있습니다.')}}
 $('loginForm').onsubmit=async e=>{e.preventDefault();const {data,error}=await auth.auth.signInWithPassword({email:$('email').value,password:$('password').value});$('password').value='';if(error)message(error.message);else await render(data.session)};
 $('logout').onclick=async()=>{const {error}=await auth.auth.signOut();if(error)message(error.message);else await render(null)};
