@@ -1,5 +1,5 @@
 {
-  "step": 4,
+  "step": 5,
   "repoUrl": "https://github.com/gkacksdnjs22-stack/choi-bujang-secret-vault",
   "publicAppUrl": "https://choi-bujang-secret-vault-qovm.vercel.app",
   "sampleMarker": "SAMPLE_NOTE_1",
@@ -14,8 +14,9 @@
     "POST /api/notes",
     "GET /api/notes/:id",
     "PUT /api/notes/:id",
-    "DELETE /api/notes/:id"
+    "DELETE /api/notes/:id",
+    "POST /api/auth"
   ],
-  "originalApiUrl": null,
+  "originalApiUrl": "https://mhcjrsyvngiokcoljeet.supabase.co/rest/v1/notes",
   "restoreRoute": null
 }
