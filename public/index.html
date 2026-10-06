@@ -49,6 +49,16 @@ button:hover,#newNote>button:hover,#loginForm>button:hover{background:linear-gra
 .note-body{border-top-color:#eee4e9}
 #newNote{border-bottom-color:#e7d5df}
 #account{background:#d9edf8;color:#52788e}
+/* Reference palette: subtle sky-to-blush background and a white card. */
+body{background:radial-gradient(ellipse at 95% 0%,#f2e5ec 0%,transparent 60%),linear-gradient(130deg,#e0eff5 0%,#eaf1f5 62%,#edf0f5 100%);background-attachment:fixed}
+section{background:#fcfefe;border-color:#ffffffb3;box-shadow:0 12px 40px #637c9508}
+input,textarea{background:#f1f7fa;border-color:#dfe8ed}
+input:focus,textarea:focus{background:#f7fbfd;border-color:#a9c7d7}
+#newNote>button,#loginForm>button,.note-card .note-actions button:first-child{background:#ead8e3;border-color:#dfcbd7;color:#785f6e}
+#newNote>button:hover,#loginForm>button:hover{background:#e4ccdb}
+#logout,.note-card .note-edit,.note-card .note-cancel{background:#eff5f8;border-color:#e0e9ee;color:#718895}
+.note-card .note-delete{background:#f8eef3;border-color:#ebdce4;color:#9a7485}
+#account{background:#e7f2f7;color:#668795}
 </style></head><body><main><p>BYTE BACK · 3단계</p><h1>로그인 자료실</h1><p>가상 자료만 사용하세요. 로그인 후 내 메모를 추가·수정·삭제할 수 있습니다.</p><section id="login"><form id="loginForm"><label>이메일<input id="email" type="email" autocomplete="username" required></label><label>비밀번호<input id="password" type="password" autocomplete="current-password" required></label><button>로그인</button></form></section><p id="status" role="status"></p><section id="workspace" hidden><p id="account"></p><button id="logout">로그아웃</button><form id="newNote"><label>제목<input id="title" maxlength="200" required></label><label>본문<textarea id="body" maxlength="10000" required></textarea></label><button>메모 추가</button></form><div id="notes"></div></section><small>과거 공개 커밋·배포는 남아 있습니다. 다른 사용자의 메모 ID에 대한 소유자 검사는 다음 단계에서 추가합니다.</small></main><script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.117.2';
 const auth=createClient('https://mhcjrsyvngiokcoljeet.supabase.co','sb_publishable_PbVmslCPDL1I4fei6avE8Q_wWDTOHv-');
