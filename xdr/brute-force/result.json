@@ -66,55 +66,55 @@
       "alertId": "bf-11",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-12",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-13",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-14",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-15",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-16",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-17",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-18",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-19",
       "action": "alert",
       "confidence": 0.5,
-      "reason": "uncertain_authentication_failures: jev_unavailable"
+      "reason": "uncertain_authentication_failures"
     },
     {
       "alertId": "bf-20",

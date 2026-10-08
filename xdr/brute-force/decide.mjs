@@ -1,20 +1,13 @@
-import { readFile } from 'node:fs/promises';
-import { extractAlerts } from './read-alerts.mjs';
-
-const patterns = JSON.parse(await readFile(new URL('./patterns.json', import.meta.url), 'utf8'));
-const names = new Set(patterns.map(p => p.name));
+// Self-contained judge module: no imports, filesystem, network, or credentials.
+// Local thresholds derive from patterns.json; they are not MITRE-prescribed numbers.
+const PATTERNS = Object.freeze(["repeated_password_guessing","password_spraying","uncertain_authentication_failures"]);
 const decision = (confidence, reason) => ({
-  action: confidence >= 0.85 ? 'block' : confidence >= 0.5 ? 'alert' : 'record',
-  confidence, reason,
+  action: confidence >= 0.85 ? 'block' : confidence >= 0.5 ? 'alert' : 'record', confidence, reason,
 });
-
-// Injection point for an official Jev adapter. No guessed endpoint or credentials.
-export function createDecider({ askJev = null, timeoutMs = 1500 } = {}) {
-  return async function decide(alert) {
-    const [safe] = extractAlerts({schema:'aleph.xdr.fixture.v1', moduleKey:'brute-force', alerts:[alert]});
-    const text = safe.description;
+export function decide(alert) {
+    const text = typeof alert?.rule?.description === 'string' ? alert.rule.description : '';
     const failures = Number(alert?.data?.count);
-    const level = safe.ruleLevel ?? 0;
+    const level = Number.isInteger(alert?.rule?.level) ? alert.rule.level : 0;
     const authFailure = /(?:로그인|비밀번호).*실패|실패.*(?:로그인|비밀번호)/u.test(text);
     const mitre = Array.isArray(alert?.rule?.mitre) && alert.rule.mitre.some(x => /^T1110(?:\.|$)/u.test(x));
     const minutes = text.match(/(\d+)분/u);
@@ -29,20 +22,6 @@ export function createDecider({ askJev = null, timeoutMs = 1500 } = {}) {
     const uncertain = (authFailure && (failures >= 2 || level >= 5))
       || (/실패/u.test(text) && level >= 5);
     if (!uncertain) return decision(0.1, 'normal_authentication_event');
-    if (!askJev) return decision(0.5, 'uncertain_authentication_failures: jev_unavailable');
-    let timer;
-    try {
-      const response = await Promise.race([
-        Promise.resolve().then(() => askJev(safe, patterns)),
-        new Promise((_, reject) => {timer = setTimeout(() => reject(new Error('timeout')), timeoutMs);}),
-      ]);
-      if (!Number.isFinite(response?.confidence) || response.confidence < 0 || response.confidence > 1
-          || !names.has(response.pattern)) throw new Error('invalid_jev_response');
-      return decision(response.confidence, response.pattern);
-    } catch {
-      return decision(0.5, 'uncertain_authentication_failures: jev_unavailable');
-    } finally {clearTimeout(timer);}
-  };
-}
+    return decision(0.5, 'uncertain_authentication_failures');
 
-export const decide = createDecider();
+}

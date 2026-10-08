@@ -17,3 +17,60 @@
 {"alertId":"bf-17","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
 {"alertId":"bf-18","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
 {"alertId":"bf-19","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-01","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-02","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-03","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-04","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-05","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-06","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-07","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-08","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-09","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-10","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-11","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-12","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-13","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-14","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-15","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-16","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-17","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-18","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-19","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures: jev_unavailable"}
+{"alertId":"bf-01","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-02","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-03","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-04","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-05","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-06","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-07","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-08","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-09","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-10","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-11","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-12","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-13","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-14","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-15","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-16","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-17","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-18","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-19","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-01","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-02","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-03","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-04","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-05","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-06","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-07","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-08","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-09","action":"block","confidence":0.95,"reason":"password_spraying"}
+{"alertId":"bf-10","action":"block","confidence":0.95,"reason":"repeated_password_guessing"}
+{"alertId":"bf-11","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-12","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-13","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-14","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-15","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-16","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-17","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-18","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
+{"alertId":"bf-19","action":"alert","confidence":0.5,"reason":"uncertain_authentication_failures"}
