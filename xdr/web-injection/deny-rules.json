@@ -1,0 +1,60 @@
+{
+  "rules": [
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "wi-01",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "wi-02",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "198.51.100.15",
+      "alertId": "wi-03",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "192.0.2.15",
+      "alertId": "wi-04",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "203.0.113.18",
+      "alertId": "wi-05",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "198.51.100.18",
+      "alertId": "wi-06",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "192.0.2.21",
+      "alertId": "wi-07",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    },
+    {
+      "ruleId": "xdr_web_injection",
+      "sourceAddress": "203.0.113.22",
+      "alertId": "wi-08",
+      "createdAt": "2026-10-08T02:35:02.755Z",
+      "expiresAt": "2026-10-08T02:50:02.755Z"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "sql_injection",
+    "condition": "SQL 구문·데이터베이스 조회 이어 붙이기 + 수준 10 이상·5회 이상 반복·수업 및 정책 안내 제외",
+    "evidence": "MITRE ATT&CK T1190은 공개 웹 앱의 SQL 주입·경로 조작 등 취약점 악용을 설명한다. 불명확한 단어만으로 공격을 확정하지 않는다.",
+    "source": "https://attack.mitre.org/techniques/T1190/"
+  },
+  {
+    "name": "script_injection",
+    "condition": "스크립트 삽입 표식 + 수준 10 이상·5회 이상 반복·수업 및 정책 안내 제외",
+    "evidence": "MITRE ATT&CK T1190은 공개 웹 앱의 SQL 주입·경로 조작 등 취약점 악용을 설명한다. 불명확한 단어만으로 공격을 확정하지 않는다.",
+    "source": "https://attack.mitre.org/techniques/T1190/"
+  },
+  {
+    "name": "path_traversal",
+    "condition": "여러 단계 경로 이탈 + 수준 10 이상·5회 이상 반복·수업 및 정책 안내 제외",
+    "evidence": "MITRE ATT&CK T1190은 공개 웹 앱의 SQL 주입·경로 조작 등 취약점 악용을 설명한다. 불명확한 단어만으로 공격을 확정하지 않는다.",
+    "source": "https://attack.mitre.org/techniques/T1190/"
+  },
+  {
+    "name": "command_injection",
+    "condition": "명령 구분자 연속 요청 + 수준 10 이상·5회 이상 반복·수업 및 정책 안내 제외",
+    "evidence": "MITRE ATT&CK T1190은 공개 웹 앱의 SQL 주입·경로 조작 등 취약점 악용을 설명한다. 불명확한 단어만으로 공격을 확정하지 않는다.",
+    "source": "https://attack.mitre.org/techniques/T1190/"
+  },
+  {
+    "name": "ambiguous_web_input",
+    "condition": "일회성 특이 입력·불명확한 주입 + 수준 5 이상, 차단 확정 조건 미충족",
+    "evidence": "MITRE ATT&CK T1190은 공개 웹 앱의 SQL 주입·경로 조작 등 취약점 악용을 설명한다. 불명확한 단어만으로 공격을 확정하지 않는다.",
+    "source": "https://attack.mitre.org/techniques/T1190/"
+  },
+  {
+    "name": "normal_web_event",
+    "condition": "주입 신호 없는 정상 이벤트 + 다른 패턴 미충족",
+    "evidence": "MITRE ATT&CK T1190은 공개 웹 앱의 SQL 주입·경로 조작 등 취약점 악용을 설명한다. 불명확한 단어만으로 공격을 확정하지 않는다.",
+    "source": "https://attack.mitre.org/techniques/T1190/"
+  }
+]

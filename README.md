@@ -73,3 +73,6 @@ DB의 기존 숫자 ID와 가상 자료를 보존하고 public_id UUID를 추가
 브라우저의 로그인과 메모 CRUD를 `/api/auth` 및 `/api/notes`로 모았습니다. Supabase 키와 직접 데이터 요청은 화면 묶음에서 제거했고, 서버 함수만 Supabase에 접근합니다. `aleph.config.json`에는 원본 자료 API 주소와 허용 경로를 기록하며, 배포 식별 파일에도 `allowedRoutes`를 포함합니다.
 
 로컬 확인: 화면 파일에서 Supabase 키·URL·SDK 문자열이 검색되지 않았고, 3·4단계 인증 거부 및 소유자 검사도 다시 통과했습니다. 실제 배포 로그인과 5단계 심판 제출은 아직 미실행입니다.
+
+## 두 번째 보너스 로컬 구현
+웹 입력 조작 공식 경보 차단 8·알림 9·기록 9, 정상 오차단 0. 실행: node scripts/check-xdr-web-injection.mjs. 운영 연결은 미완료이며 상세 기록은 xdr/web-injection/README.md에 있습니다.
