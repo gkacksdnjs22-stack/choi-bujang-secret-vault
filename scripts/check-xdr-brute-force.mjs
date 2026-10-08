@@ -21,6 +21,7 @@ for (let i = 0; i < fixture.alerts.length; i++) {
   assert.equal(result.decisions[i].action, i < 10 ? 'block' : i < 19 ? 'alert' : 'record');
 }
 assert.equal(decide({...fixture.alerts[0],id:'changed',data:{...fixture.alerts[0].data,srcip:'192.0.2.250'}}).action,'block');
+assert.equal(decide({rule:{level:12,description:'여러 계정에 같은 비밀번호 사용을 금지하는 정책을 안내했습니다.'},data:{}}).action,'record');
 const now = Date.now();
 const rules = buildDenyRules(fixture.alerts, result.decisions, {now});
 assert.equal(rules.length, 10);

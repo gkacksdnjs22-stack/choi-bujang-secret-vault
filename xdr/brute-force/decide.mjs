@@ -15,7 +15,7 @@ export function decide(alert) {
     const spray = /(?:여러|서로 다른).*계정.*같은 비밀번호/u.test(text)
       || (/계정\s*(\d+)개/u.test(text) && Number(text.match(/계정\s*(\d+)개/u)[1]) >= 10
         && /같은 간격/u.test(text) && authFailure);
-    if (level >= 10 && spray) return decision(0.95, 'password_spraying');
+    if (level >= 10 && spray && !/금지|정책.*안내|예방.*안내/u.test(text) && /실패|연속으로 넣|대입|시도/u.test(text)) return decision(0.95, 'password_spraying');
     if (authFailure && failures >= 20 && shortWindow && (mitre || level >= 10)) {
       return decision(0.95, 'repeated_password_guessing');
     }
