@@ -1,0 +1,76 @@
+{
+  "schema": "aleph.xdr.deny-candidates.local.v1",
+  "liveConnected": false,
+  "rules": [
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "bf-01",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "bf-02",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "198.51.100.20",
+      "alertId": "bf-03",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "192.0.2.30",
+      "alertId": "bf-04",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "203.0.113.21",
+      "alertId": "bf-05",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "198.51.100.44",
+      "alertId": "bf-06",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "203.0.113.15",
+      "alertId": "bf-07",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "192.0.2.18",
+      "alertId": "bf-08",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "198.51.100.8",
+      "alertId": "bf-09",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    },
+    {
+      "ruleId": "xdr_brute_force",
+      "sourceAddress": "203.0.113.40",
+      "alertId": "bf-10",
+      "createdAt": "2026-10-08T02:17:44.621Z",
+      "expiresAt": "2026-10-08T02:32:44.621Z"
+    }
+  ]
+}
