@@ -46,3 +46,16 @@ $('run').onclick=async()=>{
     $('testStatus').textContent='시험 실행 완료 · 각 행의 일치/불일치를 확인하세요. 타인 ID 미입력 시 타인 시험은 미실행입니다. 공식 41종 결과와 별개입니다.';
   }catch(error){$('testStatus').textContent='시험 중단 · '+error.message;}finally{$('run').disabled=false;}
 };
+
+async function loadReceipt(){
+  $('receiptRefresh').disabled=true;
+  try{
+    const response=await fetch('/api/checks',{cache:'no-store'}),data=await response.json();
+    if(!response.ok||!['total','blocked','failed','notRun'].every(k=>Number.isInteger(data[k])&&data[k]>=0)
+      ||data.total!==data.blocked+data.failed+data.notRun)throw Error('기록 검증 실패');
+    $('receipt').textContent=`실제 읽기 요청 기록 · ${data.checkedAt}\n검사한 커밋: ${data.commit}\n점검 항목: ${data.total}\n조건 충족: ${data.blocked}\n조건 불충족: ${data.failed}\n미실행: ${data.notRun}\n출처: ${data.source}`;
+  }catch{$('receipt').textContent='서버 점검 기록을 읽지 못했습니다. 수치를 표시하지 않습니다.';}
+  finally{$('receiptRefresh').disabled=false;}
+}
+$('receiptRefresh').onclick=loadReceipt;
+loadReceipt();

@@ -1,5 +1,17 @@
 # BYTE BACK 방어전 시작 틀 R5
 
+## 12단계 실행 기록 대조 보완 (2026-10-13)
+
+1cf724d 재제출은 45점 S12_SCREEN_MISMATCH입니다. 위쪽의 최신 기록을 우선하며 아래의 미제출 문구는 과거 기록입니다. 재제출 접수는 완료됐고 새 수정은 아직 제출하지 않았습니다.
+
+12단계 카드의 이어받기·제작1~3·제출 전 확인·실패 안내와 공식 ChoiTimo/byteback-sample-pass의 README, attack-check, bundle, checks API, 화면을 대조했습니다. observed의 설명/virtualReady/decisions/standalone/icons는 지원되는 관측 형식이 아니며 복구GET·manifest·작전실 요청의 alephEvidence가 없었습니다. 모든 실제 요청에 사례 ID를 연결하고 HTTP 상태와 jsonReady만 기록합니다. 쓰기 5건은 not_run, 통신 실패도 not_run이며 조건 불충족은 breached로 구분합니다. stage/result는 공식 표본과 같은 자기보고 요약 값이며 심판 영수증을 대신하지 않습니다.
+
+기존 /api/checks는 가상 개별 사례만 받았고 점검 합계 조회가 없었습니다. 빌드 때 현재 공개 배포에 GET만 보내 artifacts/checks.json을 새로 생성하며 /api/checks(쿼리 없음)가 이 기록의 total/blocked/failed/notRun/checkedAt/commit만 읽습니다. 작전실의 ‘배포 자기 점검 기록’은 같은 응답을 그대로 표시하며 조회 실패/잘못된 합계면 수치를 숨깁니다. 원문 메모·계정·기기·키는 기록하지 않습니다. 보호 자료실 및 개인 요약의 인증·서명·소유권 검사는 그대로입니다.
+
+이 기록은 빌드 시점 공개 배포를 읽은 자기 점검이며 새 배포의 모든 기능을 시험했다는 뜻이 아닙니다. 공개 고정 가상 입력과 실제 무인증 응답을 구분하며 공식41종 결과와 합산하지 않습니다. 배포 뒤 npm run bundle로 새 공개 배포를 재독하고 API/화면의 수치와 대조합니다. 통신 실패는 미실행으로 남기며 0건 성공으로 바꾸지 않습니다. artifacts/checks.json은 Vercel 함수에 포함하되 Git에 커밋하지 않습니다.
+
+검토: npm run test:step12에서 GET 제한, 요청별 사례 ID, 지원 observed 문법, 20항목/15실행/5미실행, 실패 및 통신 장애, 서버 기록과 화면 합계 일치·장애 시 숨김을 확인했습니다. 기존8~11·서버·서명 회귀와 로컬 정적 빌드도 통과했습니다. 배포 후 실제 HTTP 확인은 아직 남아 있습니다. 화면에서 작전실→‘점검 기록 새로 읽기’를 누릅니다. 정상은 서버 기록의 실제 수치 표시, 기록 실패는 수치 숨김입니다.
+
 ## 12단계 저장점: 탈환 작전실 (2026-10-13)
 
 365df75 제출은 0점 `S12_BUNDLE_UNSUPPORTED`였습니다. 판정은 제출 묶음에서 GET/HEAD 외 요청을 보내 격리 환경 실행이 끝나지 않는다는 내용입니다. 자기 점검만 읽기 전용으로 수정하고 POST/PUT/DELETE·복구 POST·승인 신청 POST의 5항목을 `observed: not_run`으로 표시했습니다. 실제 API 방어나 별도 HTTP 시험은 유지합니다. GET/HEAD 외 요청을 거부하는 fetch 가드에서 점검20항목/실제GET15건/쓰기0건을 확인했습니다. 재제출은 하지 않았습니다.
