@@ -1,3 +1,4 @@
+import {enforceAppProof} from '../src/app-proof.mjs';
 import {requestAuthorization} from '../src/session-cookie.mjs';
 import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
 import { randomUUID } from 'node:crypto';
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST' && id) return res.status(405).json({error:'메모 추가는 목록 경로에서만 허용합니다.'});
     if (id && (typeof id !== 'string' || !uuid.test(id))) return res.status(400).json({error:'올바른 메모 ID가 필요합니다.'});
     const shape = row => ({id:row.public_id,title:row.title,body:row.content,resourceId:`notes:${row.public_id}`});
+    if (!await enforceAppProof({req,res,db,identity,config})) return res;
     if (!await enforceServerResourcePolicy({ req, res, db, config, identity, resource: 'notes', id })) return res;
     if (req.method === 'GET') {
       let query = db.from('notes').select('public_id,title,content');

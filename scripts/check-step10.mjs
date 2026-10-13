@@ -1,3 +1,6 @@
+import {signedFixture} from './app-proof-fixture.mjs';
+import {readFileSync} from 'node:fs';
+const proofConfig=JSON.parse(readFileSync(new URL('../aleph.config.json',import.meta.url),'utf8'));
 import assert from 'node:assert/strict';
 import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -31,6 +34,7 @@ const snapshot={id,owner:'B',title:'virtual',content:'virtual',hash:contentHash(
 const notes=new Map([[id,{...snapshot,content:'changed'}],[other,{owner:'A',content:'unchanged'}]]);
 const audit=['existing'];let outage=false,registered=true;
 const db={async rpc(name,args){
+  if(name==='consume_app_request_nonce')return {data:true};
   assert.ok(['preview_private_note_recovery','restore_verified_private_note'].includes(name));
   if(outage||!registered||args.p_actor_id!=='B'||args.p_note_id!==id||contentHash(snapshot.content)!==snapshot.hash)
     return {error:{message:'denied'}};
@@ -61,7 +65,7 @@ registerHooks({resolve(specifier,ctx,next){
 const {default:handler}=await import('../api/restore/[noteId].mjs');
 const request=async(method,url,auth,body)=>{
   const res={setHeader(){},status(code){this.code=code;return this;},json(value){this.value=value;return this;}};
-  await handler({method,url,headers:{authorization:auth},body},res);return res;
+  await handler(signedFixture({method,url,headers:{authorization:auth},body},'B',proofConfig),res);return res;
 };
 assert.equal((await request('GET','/api/restore/'+id)).code,405);
 assert.equal((await request('POST','/api/restore/'+id)).code,401);

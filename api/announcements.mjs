@@ -1,3 +1,4 @@
+import {enforceAppProof} from '../src/app-proof.mjs';
 import {requestAuthorization} from '../src/session-cookie.mjs';
 import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
 import { randomUUID } from 'node:crypto';
@@ -21,6 +22,7 @@ export default async function handler(req, res) {
     if (!resourceRouteAllowed(config, 'announcements', req.method, id)) return res.status(403).json({error:'허용되지 않은 자료 구역 또는 동작입니다.',reasonCode:'resource_zone_denied'});
     const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
     if (!['GET', 'POST', 'PUT', 'DELETE'].includes(req.method)) return res.status(405).json({ error: '지원하지 않는 요청입니다.' });
+    if (!await enforceAppProof({req,res,db,identity,config})) return res;
     if (!await enforceServerResourcePolicy({ req, res, db, config, identity, resource: 'announcements', id })) return res;
     if (req.method !== 'GET') {
       const { data: membership, error } = await db.from('instructor_memberships').select('enabled')

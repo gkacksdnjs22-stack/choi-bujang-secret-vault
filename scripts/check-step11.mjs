@@ -52,7 +52,7 @@ async function screen(registered,deviceStatus=200){
     const value=path==='/api/notes'?[]:options.method==='POST'?{requested:true}:{registered};
     return {status,ok:status>=200&&status<300,async json(){return value;}};
   };
-  const execute=new Function('document','fetch','sessionStorage','navigator','window','return (async()=>{'+app+'})()');
+  const execute=new Function('document','fetch','sessionStorage','navigator','window','return (async()=>{'+app.replace(/^import[^\n]*\r?\n/,'').replace('let protectedFetch=createProtectedFetch(authHeaders);','const createProtectedFetch=()=>fetch;let protectedFetch=fetch;')+'})()');
   await execute({getElementById:element},fetch,{getItem(){return null;},removeItem(){}},{onLine:true},{addEventListener(){}});
   return {element,calls};
 }

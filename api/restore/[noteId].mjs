@@ -1,3 +1,4 @@
+import {enforceAppProof} from '../../src/app-proof.mjs';
 import {requestAuthorization} from '../../src/session-cookie.mjs';
 import {readFileSync} from 'node:fs';
 import {createClient} from '@supabase/supabase-js';
@@ -32,6 +33,7 @@ export default async function handler(req,res) {
       return res.status(400).json({error:'자료 ID 한 개만 지정하세요.'});
     const context=serverDeviceContext(req,res,identity,config,key);
     const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+    if(!await enforceAppProof({req,res,db,identity,config,context}))return res;
     const args={db,noteId:match[1].toLowerCase(),identity,context};
     if(body?.preview===true)return res.status(200).json(await previewPrivateNote(args));
     return res.status(200).json(await restorePrivateNote({...args,expectedVersion:body?.expectedVersion,expectedState:body?.expectedState}));

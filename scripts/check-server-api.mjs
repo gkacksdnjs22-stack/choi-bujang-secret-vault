@@ -1,3 +1,4 @@
+import {signedFixture} from './app-proof-fixture.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
@@ -14,7 +15,7 @@ const newId = '00000000-0000-4000-8000-000000000003';
 const tables = { notes: [{ public_id: noteId, owner_id: 'A', title: 'fixture', content: 'fixture' }],
   announcements: [{ public_id: noticeId, title: 'fixture', content: 'fixture' }],
   principal_bindings: [], instructor_memberships: [] };
-let dbFailure = false;
+let dbFailure = false;const usedProofNonces=new Set();
 const response = () => ({ headers: {}, setHeader(k,v) {this.headers[k]=v;},
   status(code) {this.code=code;return this;}, json(value) {this.value=value;return this;} });
 const cookies = {};
@@ -44,7 +45,7 @@ class Query {
     return Promise.resolve({data:this.single?(found[0]??null):found,error:null}).then(resolve,reject);
   }
 }
-globalThis.__serverApiFixture = {createClient:()=>({from:table=>new Query(table)}),
+globalThis.__serverApiFixture = {createClient:()=>({from:table=>new Query(table),async rpc(name,args){if(dbFailure)return {error:{message:'fixture outage'}};const nonce=args.p_certificate_id+args.p_nonce;if(usedProofNonces.has(nonce))return {data:false};usedProofNonces.add(nonce);return {data:true};}}),
   createLoginVerifier:()=>async header=>['fixture_A','fixture_B','fixture_I'].includes(header)
     ?{kind:'student',userId:header.slice(-1)}:null};
 registerHooks({resolve(specifier,context,next){
@@ -55,7 +56,7 @@ registerHooks({resolve(specifier,context,next){
 const {default:notes}=await import('../api/notes.mjs');
 const {default:notices}=await import('../api/announcements.mjs');
 async function call(handler,user,method,url,body,cookie=cookies[user]) {
-  const res=response();await handler({method,url,headers:{authorization:'fixture_'+user,cookie},body},res);
+  const res=response();await handler(signedFixture({method,url,headers:{authorization:'fixture_'+user,cookie},body},user,config),res);
   assert.equal(res.headers['Cache-Control'],'no-store');return res;
 }
 assert.equal((await call(notes,'A','GET','/api/notes')).value.length,1);
@@ -94,3 +95,13 @@ assert.deepEqual(tables.announcements,before);
 dbFailure=true;
 assert.equal((await call(notes,'A','GET','/api/notes')).code,403);
 console.log('자체 서버 API 통합 검증 통과: 활성 판정 + 본인 CRUD + 타인 차단 + 역할 위조 + 접속/강사 권한 회수 + DB 장애 차단. 가상 DB 시험이며 실제 자료는 변경하지 않았습니다.');
+
+const protectedBefore=structuredClone(tables.notes);
+const unsigned=response();await notes({method:'GET',url:'/api/notes',headers:{authorization:'fixture_A',cookie:cookies.A}},unsigned);
+assert.equal(unsigned.code,403);assert.equal(unsigned.value.reasonCode,'app_proof_invalid');
+let forged=signedFixture({method:'GET',url:'/api/notes/'+noteId,headers:{authorization:'fixture_A',cookie:cookies.A}},'A',config);
+forged.url='/api/notes/'+noticeId;const forgedResponse=response();await notes(forged,forgedResponse);assert.equal(forgedResponse.code,403);assert.equal(forgedResponse.value.reasonCode,'app_proof_invalid');
+forged=signedFixture({method:'PUT',url:'/api/notes/'+noteId,body:{title:'virtual',body:'virtual'},headers:{authorization:'fixture_A',cookie:cookies.A}},'A',config);
+forged.body.body='changed after signature';const changedResponse=response();await notes(forged,changedResponse);assert.equal(changedResponse.code,403);assert.equal(changedResponse.value.reasonCode,'app_proof_invalid');
+assert.deepEqual(tables.notes,protectedBefore);
+console.log('실제 API 함수의 서명 누락·경로/본문 변조 거부 및 메모 무변경 확인 (가상 DB).');

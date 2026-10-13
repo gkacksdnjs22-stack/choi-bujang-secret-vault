@@ -1,7 +1,9 @@
+import {createProtectedFetch} from './request-proof.mjs';
 const $=id=>document.getElementById(id); let session=null; let recoveryPreview=null;
 const authHeaders=()=>session?.access_token?{Authorization:'Bearer '+session.access_token}:{};
+let protectedFetch=createProtectedFetch(authHeaders);
 const message=text=>{$('status').textContent=text};
-async function api(path='',method='GET',body){const r=await fetch('/api/notes'+path,{method,headers:{...authHeaders(),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Error(data.error||'요청 실패');return data}
+async function api(path='',method='GET',body){const r=await protectedFetch('/api/notes'+path,{method,headers:{...authHeaders(),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Error(data.error||'요청 실패');return data}
 function noteCard(note) {
   const card=document.createElement('article'); card.className='note-card';
   const row=document.createElement('div'); row.className='note-row';
@@ -37,7 +39,7 @@ async function refreshApproval(){
   }catch(error){$('approvalStatus').textContent=error.message+' · 보호 자료를 표시하지 않습니다.';}
 }
 async function render(next){
-  session=next;recoveryPreview=null;$('restorePreview').textContent='';$('restoreResult').textContent='';$('restoreForm').reset();
+  session=next;protectedFetch=createProtectedFetch(authHeaders);recoveryPreview=null;$('restorePreview').textContent='';$('restoreResult').textContent='';$('restoreForm').reset();
   $('accessResult').textContent='';$('accessCheck').reset();$('deviceInfo').textContent='';$('notes').replaceChildren();
   $('login').hidden=!!session;$('workspace').hidden=true;$('approvalPanel').hidden=!session;
   if(session)await refreshApproval();else message('로그인 후 자료를 볼 수 있습니다.');
@@ -54,9 +56,9 @@ $('loginForm').onsubmit=async e=>{e.preventDefault();const r=await fetch('/api/a
 $('logout').onclick=async()=>{await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({logout:true})});await render(null)};
 $('newNote').onsubmit=async e=>{e.preventDefault();try{const added=await api('','POST',{title:$('title').value,body:$('body').value});$('newNote').reset();await load();message('추가했습니다. 메모 ID: '+added.id)}catch(e){message(e.message)}};
 $('deviceStatus').onclick=async()=>{if(!session)return;const button=$('deviceStatus');button.disabled=true;try{const response=await fetch('/api/device',{headers:authHeaders()});const data=await response.json();if(!response.ok)throw Error(data.error||'접속 확인 실패');$('deviceInfo').textContent=[data.registered?'접속 등록 완료':'접속 등록 대기','계정 ID: '+data.userId,'실습 범위: '+data.classId,'프로젝트: '+data.projectId,'사용자 식별자: '+data.subjectId,'브라우저 식별자: '+data.deviceId].join('\n');}catch(e){$('deviceInfo').textContent=e.message}finally{button.disabled=false}};
-$('accessCheck').onsubmit=async e=>{e.preventDefault();if(!session)return;const id=$('checkNoteId').value.trim();const result=$('accessResult');if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)){result.textContent='올바른 메모 ID를 입력하세요.';return}const button=$('checkAccess');button.disabled=true;try{const response=await fetch('/api/notes/'+encodeURIComponent(id),{headers:authHeaders()});const data=await response.json();result.textContent=`HTTP ${response.status} · `+(response.ok?'조회 허용':(data.reasonCode||data.error||'조회 거부'));}catch{result.textContent='응답을 확인할 수 없습니다.'}finally{button.disabled=false}};
+$('accessCheck').onsubmit=async e=>{e.preventDefault();if(!session)return;const id=$('checkNoteId').value.trim();const result=$('accessResult');if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)){result.textContent='올바른 메모 ID를 입력하세요.';return}const button=$('checkAccess');button.disabled=true;try{const response=await protectedFetch('/api/notes/'+encodeURIComponent(id),{headers:authHeaders()});const data=await response.json();result.textContent=`HTTP ${response.status} · `+(response.ok?'조회 허용':(data.reasonCode||data.error||'조회 거부'));}catch{result.textContent='응답을 확인할 수 없습니다.'}finally{button.disabled=false}};
 async function recoveryRequest(id,body){
-  const response=await fetch('/api/restore/'+encodeURIComponent(id),{method:'POST',headers:{...authHeaders(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const response=await protectedFetch('/api/restore/'+encodeURIComponent(id),{method:'POST',headers:{...authHeaders(),'Content-Type':'application/json'},body:JSON.stringify(body)});
   const data=await response.json();if(!response.ok)throw Error('HTTP '+response.status+' · '+(data.reasonCode||data.error||'복구 거부'));
   return data;
 }

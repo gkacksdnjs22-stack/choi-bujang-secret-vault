@@ -11,6 +11,12 @@
   },
   "allowedRoutes": [
     {
+      "service": "auth",
+      "method": "POST",
+      "pathPattern": "/api/app-certificate",
+      "zone": "authentication"
+    },
+    {
       "service": "notes",
       "method": "GET",
       "pathPattern": "/api/notes",
