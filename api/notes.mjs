@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { createLoginVerifier } from '../src/verify-login.mjs';
+import { apiResourceTarget } from '../src/resource-routes.mjs';
 const config = JSON.parse(readFileSync(new URL('../aleph.config.json', import.meta.url), 'utf8'));
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let verify;
@@ -15,9 +16,12 @@ export default async function handler(req, res) {
     const identity = await verify(req.headers.authorization);
     if (!identity) return res.status(401).json({error:'로그인이 필요합니다.'});
     const db = createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
-    const id = req.query?.id;
+    const target = apiResourceTarget(req, 'notes');
+    if (target.invalid) return res.status(400).json({error:'허용되지 않은 자료 경로입니다.',reasonCode:'resource_path_denied'});
+    const id = target.id;
+    if (req.method === 'POST' && id) return res.status(405).json({error:'메모 추가는 목록 경로에서만 허용합니다.'});
     if (id && (typeof id !== 'string' || !uuid.test(id))) return res.status(400).json({error:'올바른 메모 ID가 필요합니다.'});
-    const shape = row => ({id:row.public_id,title:row.title,body:row.content});
+    const shape = row => ({id:row.public_id,title:row.title,body:row.content,resourceId:`notes:${row.public_id}`});
     if (req.method === 'GET') {
       let query = db.from('notes').select('public_id,title,content');
       if(id) query=query.eq('public_id',id).eq('owner_id',identity.userId).maybeSingle();
@@ -35,7 +39,7 @@ export default async function handler(req, res) {
       return data?res.status(200).json({id}):res.status(404).json({error:'메모가 없습니다.'});
     }
     const body=typeof req.body==='string'?JSON.parse(req.body):req.body;
-    if (body && Object.hasOwn(body,'owner_id')) return res.status(400).json({error:'소유자는 서버에서 결정합니다.'});
+    if (body && ['owner_id','role','resourceId'].some(key => Object.hasOwn(body,key))) return res.status(400).json({error:'소유자와 권한은 서버에서 결정합니다.'});
     if(typeof body?.title!=='string'||typeof body?.body!=='string'||!body.title.trim()||body.title.length>200||body.body.length>10000)return res.status(400).json({error:'제목과 본문을 확인하세요.'});
     if(req.method==='POST') {
       const newId=body.id??randomUUID();

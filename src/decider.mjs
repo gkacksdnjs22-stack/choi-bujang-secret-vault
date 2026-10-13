@@ -1,7 +1,8 @@
 // ALEPH SDP 엔진이 확인한 요청만 받는 학생 판정기 시작점입니다.
 // 신원·기기·경로의 선행 검사는 엔진이 담당합니다.
 // 요청 본문의 userId, role, 기기 키, 토큰을 별도로 믿거나 저장하지 마세요.
-export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required']);
+import { permittedResourceRoute } from './resource-routes.mjs';
+export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'resource_zone']);
 
 // 가상 신호만 평가합니다. 실제 source:none의 unknown 값을 정상 위치로 바꾸지 않습니다.
 function requiresStepUp(request) {
@@ -23,6 +24,10 @@ function requiresStepUp(request) {
 
 export async function decide(request) {
   const registered = request.deviceRegistered === true;
+  if (registered && !permittedResourceRoute(request)) return {
+    schema: 'aleph.decision.v1', requestId: request.requestId,
+    decision: 'deny', reasonCode: 'policy_denied', ruleIds: ['resource_zone'],
+  };
   const freshVerification = request.stepUp?.verified === true
     && Number.isInteger(request.stepUp.authAgeSeconds)
     && request.stepUp.authAgeSeconds >= 0 && request.stepUp.authAgeSeconds <= 900;
