@@ -22,5 +22,11 @@ export async function runAttackChecks(config) {
     attempts.push({attackId:caseId,expected:'고정 가상 DB에서 정상 허용과 구역/기기/위험 규칙 검증 (실제 계정 시험 아님)',
       observed:`HTTP ${response.status}; virtualReady=${result?.source==='fixed_virtual_fixture'&&result?.ready===true}; decisions=${result?.checks?.map(item=>item.decision).join(',')??result?.action??'unavailable'}`});
   }
+  if(config.step>=10){
+    for(const method of ['POST','GET']){
+      const result=await fetch(new URL('/api/restore/00000000-0000-4000-8000-000000000001',app),{method,redirect:'error',signal:AbortSignal.timeout(10000)});
+      attempts.push({attackId:`s10_restore_${method.toLowerCase()}`,expected:method==='POST'?'무로그인 복구 401 거부':'복구 경로의 GET 405 거부',observed:`HTTP ${result.status}`});
+    }
+  }
   return attempts;
 }

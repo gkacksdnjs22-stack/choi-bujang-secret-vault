@@ -1,0 +1,59 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {registerHooks} from 'node:module';
+import {contentHash,previewPolicyRestore,restoreTestPolicy,restorePrivateNote} from '../src/recovery.mjs';
+const backup={revision:1,services:{notes:{ownerOnly:true},notices:{teacherOnly:true}}};
+const hash=createHash('sha256').update(JSON.stringify(backup)).digest('hex');
+const current={revision:2,services:{notes:{ownerOnly:false},notices:{teacherOnly:true}},audit:['existing']};
+const original=structuredClone(current);
+assert.deepEqual(previewPolicyRestore({backup,current,trustedHash:hash}),{revision:1,changedServices:['notes']});
+assert.throws(()=>previewPolicyRestore({backup:null,current,trustedHash:hash}));
+assert.throws(()=>previewPolicyRestore({backup,current,trustedHash:'bad'}));
+assert.throws(()=>restoreTestPolicy({backup,current,trustedHash:hash,confirmedServices:['notices']}));
+const restored=restoreTestPolicy({backup,current,trustedHash:hash,confirmedServices:['notes']});
+assert.equal(restored.services.notes.ownerOnly,true);assert.deepEqual(restored.audit,current.audit);
+assert.deepEqual(current,original);assert.deepEqual(restored.services.notices,current.services.notices);
+// 메모 복구는 가상 RPC 모델입니다. SQL을 실제 DB에서 실행한 증거가 아닙니다.
+const id='00000000-0000-4000-8000-000000000002';
+const other='00000000-0000-4000-8000-000000000001';
+const snapshot={id,owner:'B',title:'virtual',content:'virtual',hash:contentHash('virtual')};
+const notes=new Map([[id,{...snapshot,content:'changed'}],[other,{owner:'A',content:'unchanged'}]]);
+const audit=['existing'];let outage=false,registered=true;
+const db={async rpc(name,args){
+  assert.equal(name,'restore_private_note');
+  if(outage||!registered||args.p_actor_id!=='B'||args.p_note_id!==id||contentHash(snapshot.content)!==snapshot.hash)
+    return {error:{message:'denied'}};
+  notes.set(id,{...snapshot});audit.push('restored_verified');return {data:{id,verified:true}};
+}};
+const context={classId:'virtual',projectId:'virtual',subjectId:'virtual',deviceId:'a'.repeat(16)};
+const call=actor=>restorePrivateNote({db,noteId:id,identity:{userId:actor},context});
+assert.deepEqual(await call('B'),{id,verified:true});assert.equal(notes.get(id).content,'virtual');
+notes.delete(id);await call('B');assert.equal(notes.get(id).owner,'B');
+const before=structuredClone([...notes]);await assert.rejects(call('A'));assert.deepEqual([...notes],before);
+registered=false;await assert.rejects(call('B'));registered=true;
+outage=true;await assert.rejects(call('B'));outage=false;
+assert.equal(notes.get(other).content,'unchanged');assert.equal(audit[0],'existing');
+process.env.SUPABASE_SECRET_KEY='local-recovery-fixture';process.env.SUPABASE_URL='https://local.invalid';
+globalThis.__recoveryDb=db;
+registerHooks({resolve(specifier,ctx,next){
+  if(specifier==='@supabase/supabase-js')return {url:'data:text/javascript,export const createClient=()=>globalThis.__recoveryDb',shortCircuit:true};
+  if(specifier.endsWith('/verify-login.mjs'))return {url:'data:text/javascript,export const createLoginVerifier=()=>async header=>header===%22virtual_B%22?{userId:%22B%22}:null',shortCircuit:true};
+  return next(specifier,ctx);
+}});
+const {default:handler}=await import('../api/restore/[noteId].mjs');
+const request=async(method,url,auth,body)=>{
+  const res={setHeader(){},status(code){this.code=code;return this;},json(value){this.value=value;return this;}};
+  await handler({method,url,headers:{authorization:auth},body},res);return res;
+};
+assert.equal((await request('GET','/api/restore/'+id)).code,405);
+assert.equal((await request('POST','/api/restore/'+id)).code,401);
+assert.equal((await request('POST','/api/restore/'+id+'?owner=B','virtual_B')).code,400);
+assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{role:'admin'})).code,400);
+assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{})).code,200);
+registered=false;
+assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{})).code,403);
+registered=true;
+process.env.RESOURCE_POLICY_MODE='off';
+assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{})).code,503);
+delete process.env.RESOURCE_POLICY_MODE;
+console.log('10단계 정책 사본 검증·범위 확인·가상 단건 복구·타인/미등록/장애 차단·실제 API 함수 가상 시험 통과. 실제 DB 검증은 별도 SQL 시험입니다.');

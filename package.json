@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:step10": "node scripts/check-step10.mjs",
     "test:step9": "node scripts/check-step9.mjs",
     "test:step8": "node scripts/check-step8.mjs",
     "test:server": "node scripts/check-server-api.mjs",
