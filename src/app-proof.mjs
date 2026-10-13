@@ -19,6 +19,7 @@ export function proofTarget(url){
   return target.pathname+target.search;
 }
 export function proofMessage({method,url,body,certificate,time,nonce}){
+  if(['GET','DELETE'].includes(method)&&body&&typeof body==='object'&&!Array.isArray(body)&&Object.keys(body).length===0)body=undefined;
   return JSON.stringify(['vault-app-proof-v1',method,proofTarget(url),hash(canonicalBody(body)),hash(certificate),time,nonce]);
 }
 function safePublicKey(publicKey){
