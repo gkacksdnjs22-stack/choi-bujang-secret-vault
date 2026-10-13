@@ -41,6 +41,6 @@ export default async function handler(req,res){
       recovery:{source:'stored_backup_read_verified',versions,inspected:versions.length,total:notes.data.length},
       detection:{state:'not_connected',eventCount:null,source:'operator_events_not_received'},
       revocation:{state:'not_executed',source:'current_binding_read_only'},
-      officialTests:{total:41,executed:0,source:'official_individual_results_not_received'}});
+      officialTests:{total:41,executed:0,blocked:0,failed:0,notRun:41,source:'official_individual_results_not_received'}});
   }catch{return res.status(503).json({error:'작전실 결과 조회 실패'});}
 }

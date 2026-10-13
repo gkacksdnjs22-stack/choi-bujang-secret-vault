@@ -17,25 +17,30 @@ globalThis.fetch=async(url,options)=>{
 let attempts;
 try{
   attempts=await runAttackChecks({step:12,publicAppUrl:'https://vault.invalid/'});
-  assert.equal(attempts.length,20);assert.equal(calls.length,15);assert.equal(new Set(calls).size,15);
+  assert.equal(attempts.length,18);assert.equal(calls.length,13);assert.equal(new Set(calls).size,13);
   for(const a of attempts){assert.match(a.observed,/^(not_run|HTTP \d{3}(; jsonReady=(true|false))?)$/);
     assert.equal(calls.includes(a.attackId),a.result!=='not_run');}
-  assert.equal(attempts.filter(a=>a.result==='blocked').length,15);
-  mode='failed';assert.equal((await runAttackChecks({step:12,publicAppUrl:'https://vault.invalid/'})).filter(a=>a.result==='breached').length,9);
+  assert.ok(!attempts.some(a=>['s08-own','s11-manifest'].includes(a.attackId)));
+  assert.equal(attempts.filter(a=>a.result==='blocked').length,13);
+  mode='failed';assert.equal((await runAttackChecks({step:12,publicAppUrl:'https://vault.invalid/'})).filter(a=>a.result==='breached').length,8);
   mode='network';assert.ok((await runAttackChecks({step:12,publicAppUrl:'https://vault.invalid/'})).every(a=>a.result==='not_run'));
 }finally{globalThis.fetch=original;}
 const receipt={commit:'a'.repeat(40),checkedAt:new Date().toISOString(),attackAttempts:attempts};
 const summary=summarizeChecks(receipt);
-assert.deepEqual([summary.total,summary.blocked,summary.failed,summary.notRun],[20,15,0,5]);
+assert.deepEqual([summary.total,summary.blocked,summary.failed,summary.notRun],[18,13,0,5]);
 assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{result:'blocked',observed:'not_run'}]}));
 assert.throws(()=>summarizeChecks({...receipt,checkedAt:'invalid'}));
+assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s11-manifest',result:'blocked',observed:'HTTP 200'}]}));
+assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s08-own',result:'blocked',observed:'HTTP 200; jsonReady=true'}]}));
+assert.deepEqual([summary.officialTests.total,summary.officialTests.executed,summary.officialTests.blocked,summary.officialTests.notRun],[41,0,0,41]);
 // Render exactly the API counts, including unexpected failures; no guessed totals.
 const source=await readFile(new URL('../public/operations.mjs',import.meta.url),'utf8');
 const elements=new Map();const el=id=>{if(!elements.has(id))elements.set(id,{append(){},textContent:'',disabled:false});return elements.get(id);};
 const context=vm.createContext({document:{getElementById:el,createElement:()=>({})},
-  createProtectedFetch:()=>()=>{},fetch:async()=>new Response(JSON.stringify({...summary,blocked:12,failed:3}),{status:200}),console});
+  createProtectedFetch:()=>()=>{},fetch:async()=>new Response(JSON.stringify({...summary,blocked:10,failed:3}),{status:200}),console});
 await vm.runInContext(source.replace(/^import .*;\r?\n/,'' )+'\nloadReceipt();',context);
-assert.match(el('receipt').textContent,/12/);assert.match(el('receipt').textContent,/3/);assert.match(el('receipt').textContent,/5/);
+assert.match(el('receipt').textContent,/10/);assert.match(el('receipt').textContent,/3/);assert.match(el('receipt').textContent,/5/);assert.match(el('official').textContent,/41/);
+assert.match(el('official').textContent,/차단 0/);
 context.fetch=async()=>new Response('{}',{status:503});await vm.runInContext('loadReceipt()',context);
 assert.equal(el('receipt').textContent.includes('20'),false);
 console.log('step12: evidence IDs, GET-only, supported observations, failure/not_run accounting and API-to-screen counts passed');
