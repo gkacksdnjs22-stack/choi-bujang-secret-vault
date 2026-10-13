@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {registerHooks} from 'node:module';
-import {contentHash,previewPolicyRestore,restoreTestPolicy,restorePrivateNote} from '../src/recovery.mjs';
+import {contentHash,previewPolicyRestore,restoreTestPolicy,previewStoredPolicy,restoreStoredTestPolicy,previewPrivateNote,restorePrivateNote} from '../src/recovery.mjs';
 const backup={revision:1,services:{notes:{ownerOnly:true},notices:{teacherOnly:true}}};
 const hash=createHash('sha256').update(JSON.stringify(backup)).digest('hex');
 const current={revision:2,services:{notes:{ownerOnly:false},notices:{teacherOnly:true}},audit:['existing']};
@@ -13,6 +16,14 @@ assert.throws(()=>restoreTestPolicy({backup,current,trustedHash:hash,confirmedSe
 const restored=restoreTestPolicy({backup,current,trustedHash:hash,confirmedServices:['notes']});
 assert.equal(restored.services.notes.ownerOnly,true);assert.deepEqual(restored.audit,current.audit);
 assert.deepEqual(current,original);assert.deepEqual(restored.services.notices,current.services.notices);
+const directory=await mkdtemp(join(tmpdir(),'byteback-recovery-'));
+try {
+  const backupPath=join(directory,'policy.json');await writeFile(backupPath,JSON.stringify(backup));
+  assert.deepEqual(await previewStoredPolicy({backupPath,current,trustedHash:hash}),{revision:1,changedServices:['notes']});
+  await writeFile(backupPath,JSON.stringify({...backup,revision:3}));
+  await assert.rejects(restoreStoredTestPolicy({backupPath,current,trustedHash:hash,confirmedServices:['notes']}));
+  await rm(backupPath);await assert.rejects(previewStoredPolicy({backupPath,current,trustedHash:hash}));
+}finally{await rm(directory,{recursive:true,force:true});}
 // 메모 복구는 가상 RPC 모델입니다. SQL을 실제 DB에서 실행한 증거가 아닙니다.
 const id='00000000-0000-4000-8000-000000000002';
 const other='00000000-0000-4000-8000-000000000001';
@@ -20,15 +31,22 @@ const snapshot={id,owner:'B',title:'virtual',content:'virtual',hash:contentHash(
 const notes=new Map([[id,{...snapshot,content:'changed'}],[other,{owner:'A',content:'unchanged'}]]);
 const audit=['existing'];let outage=false,registered=true;
 const db={async rpc(name,args){
-  assert.equal(name,'restore_private_note');
+  assert.ok(['preview_private_note_recovery','restore_verified_private_note'].includes(name));
   if(outage||!registered||args.p_actor_id!=='B'||args.p_note_id!==id||contentHash(snapshot.content)!==snapshot.hash)
     return {error:{message:'denied'}};
+  const version=contentHash(JSON.stringify(snapshot));
+  if(name==='preview_private_note_recovery')return {data:{id,verified:true,version,stateVersion:contentHash(JSON.stringify(notes.get(id)||null)),capturedAt:'2026-10-13T00:00:00Z',changedFields:notes.has(id)?['content']:['create']}};
+  if(args.p_expected_version!==version||args.p_expected_state!==contentHash(JSON.stringify(notes.get(id)||null)))return {error:{message:'stale'}};
   notes.set(id,{...snapshot});audit.push('restored_verified');return {data:{id,verified:true}};
 }};
 const context={classId:'virtual',projectId:'virtual',subjectId:'virtual',deviceId:'a'.repeat(16)};
 const call=actor=>restorePrivateNote({db,noteId:id,identity:{userId:actor},context});
 assert.deepEqual(await call('B'),{id,verified:true});assert.equal(notes.get(id).content,'virtual');
 notes.delete(id);await call('B');assert.equal(notes.get(id).owner,'B');
+const preview=await previewPrivateNote({db,noteId:id,identity:{userId:'B'},context});
+const auditBefore=audit.length;snapshot.title='new snapshot version';
+await assert.rejects(restorePrivateNote({db,noteId:id,identity:{userId:'B'},context,expectedVersion:preview.version}));
+assert.equal(audit.length,auditBefore);snapshot.title='virtual';
 const before=structuredClone([...notes]);await assert.rejects(call('A'));assert.deepEqual([...notes],before);
 registered=false;await assert.rejects(call('B'));registered=true;
 outage=true;await assert.rejects(call('B'));outage=false;
@@ -53,6 +71,10 @@ assert.equal((await request('POST','/api/restore/'+id+'?noteId='+other,'virtual_
 assert.equal((await request('POST','/api/restore/'+id+'?noteId='+id+'&noteId='+id,'virtual_B',{})).code,400);
 assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{role:'admin'})).code,400);
 assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{})).code,200);
+const previewResponse=await request('POST','/api/restore/'+id,'virtual_B',{preview:true});
+assert.equal(previewResponse.code,200);
+assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{expectedVersion:'a'.repeat(64)})).code,403);
+assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{preview:false})).code,400);
 registered=false;
 assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{})).code,403);
 registered=true;

@@ -1,4 +1,4 @@
-const $=id=>document.getElementById(id); let session=null;
+const $=id=>document.getElementById(id); let session=null; let recoveryPreview=null;
 const message=text=>{$('status').textContent=text};
 async function api(path='',method='GET',body){const r=await fetch('/api/notes'+path,{method,headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Error(data.error||'요청 실패');return data}
 function noteCard(note) {
@@ -25,11 +25,39 @@ function noteCard(note) {
   actions.append(save,cancel);form.append(title,body,actions);row.append(heading,edit,remove);detail.append(text);card.append(row,detail,form);return card;
 }
 async function load(){try{const notes=await api();$('notes').replaceChildren(...notes.map(noteCard));message(notes.length?'':'아직 내 메모가 없습니다. 가상 메모를 추가해 주세요.')}catch(e){message(e.message)}}
-async function render(next){session=next;$('restoreResult').textContent='';$('restoreForm').reset();document.getElementById('accessResult').textContent='';document.getElementById('accessCheck').reset();$('deviceInfo').textContent='';$('login').hidden=!!session;$('workspace').hidden=!session;$('notes').replaceChildren();if(session){sessionStorage.setItem('byte-back-access-token',session.access_token);$('account').textContent='로그인 완료';await load()}else{sessionStorage.removeItem('byte-back-access-token');message('로그인 후 자료를 볼 수 있습니다.')}}
+async function render(next){session=next;recoveryPreview=null;$('restorePreview').textContent='';$('restoreResult').textContent='';$('restoreForm').reset();document.getElementById('accessResult').textContent='';document.getElementById('accessCheck').reset();$('deviceInfo').textContent='';$('login').hidden=!!session;$('workspace').hidden=!session;$('notes').replaceChildren();if(session){sessionStorage.setItem('byte-back-access-token',session.access_token);$('account').textContent='로그인 완료';await load()}else{sessionStorage.removeItem('byte-back-access-token');message('로그인 후 자료를 볼 수 있습니다.')}}
 $('loginForm').onsubmit=async e=>{e.preventDefault();const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('password').value})});const data=await r.json();$('password').value='';if(!r.ok)message(data.error||'로그인 정보를 확인하세요.');else await render({access_token:data.access_token})};
 $('logout').onclick=async()=>{await render(null)};
 $('newNote').onsubmit=async e=>{e.preventDefault();try{const added=await api('','POST',{title:$('title').value,body:$('body').value});$('newNote').reset();await load();message('추가했습니다. 메모 ID: '+added.id)}catch(e){message(e.message)}};
 $('deviceStatus').onclick=async()=>{if(!session)return;const button=$('deviceStatus');button.disabled=true;try{const response=await fetch('/api/device',{headers:{Authorization:'Bearer '+session.access_token}});const data=await response.json();if(!response.ok)throw Error(data.error||'접속 확인 실패');$('deviceInfo').textContent=[data.registered?'접속 등록 완료':'접속 등록 대기','계정 ID: '+data.userId,'실습 범위: '+data.classId,'프로젝트: '+data.projectId,'사용자 식별자: '+data.subjectId,'브라우저 식별자: '+data.deviceId].join('\n');}catch(e){$('deviceInfo').textContent=e.message}finally{button.disabled=false}};
 $('accessCheck').onsubmit=async e=>{e.preventDefault();if(!session)return;const id=$('checkNoteId').value.trim();const result=$('accessResult');if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)){result.textContent='올바른 메모 ID를 입력하세요.';return}const button=$('checkAccess');button.disabled=true;try{const response=await fetch('/api/notes/'+encodeURIComponent(id),{headers:{Authorization:'Bearer '+session.access_token}});const data=await response.json();result.textContent=`HTTP ${response.status} · `+(response.ok?'조회 허용':(data.reasonCode||data.error||'조회 거부'));}catch{result.textContent='응답을 확인할 수 없습니다.'}finally{button.disabled=false}};
-$('restoreForm').onsubmit=async e=>{e.preventDefault();if(!session)return;const id=$('restoreNoteId').value.trim();const output=$('restoreResult');if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)){output.textContent='올바른 메모 ID를 입력하세요.';return}if(!$('restoreConfirm').checked){output.textContent='복구 범위와 변경 안내를 먼저 확인하세요.';return;}const button=$('restoreNote');button.disabled=true;try{const response=await fetch('/api/restore/'+encodeURIComponent(id),{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:'{}'});const data=await response.json();output.textContent='HTTP '+response.status+' · '+(response.ok&&data.verified===true&&data.id===id?'복구 완료 · 대상 ID·소유자·본문 지문 확인':data.reasonCode||data.error||'복구 결과 확인 필요');if(response.ok)await load();}catch{output.textContent='복구 응답을 확인할 수 없습니다.'}finally{button.disabled=false}};
+async function recoveryRequest(id,body){
+  const response=await fetch('/api/restore/'+encodeURIComponent(id),{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await response.json();if(!response.ok)throw Error('HTTP '+response.status+' · '+(data.reasonCode||data.error||'복구 거부'));
+  return data;
+}
+function invalidateRecoveryPreview(){recoveryPreview=null;$('restorePreview').textContent='';$('restoreConfirm').checked=false;}
+$('restoreNoteId').oninput=invalidateRecoveryPreview;
+$('previewRestore').onclick=async()=>{
+  if(!session)return;invalidateRecoveryPreview();const id=$('restoreNoteId').value.trim().toLowerCase();
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)){$('restoreResult').textContent='올바른 메모 ID를 입력하세요.';return;}
+  const button=$('previewRestore');button.disabled=true;
+  try{const data=await recoveryRequest(id,{preview:true});
+    if(data.id!==id||data.verified!==true)throw Error('사본 검증 실패');
+    if($('restoreNoteId').value.trim().toLowerCase()!==id)return;
+    recoveryPreview=data;const names={title:'제목',content:'본문',create:'삭제된 메모 한 건 다시 생성'};
+    $('restorePreview').textContent=['사본 검증 완료','사본 시각: '+data.capturedAt,'사본 버전: '+data.version,'대상 ID: '+data.id,'변경 항목: '+(data.changedFields.map(field=>names[field]).join(', ')||'없음'),'다른 메모와 기존 감사 기록은 보존합니다.'].join('\n');
+    $('restoreResult').textContent='버전과 변경 항목을 확인한 뒤 복구를 실행하세요.';
+  }catch(error){$('restoreResult').textContent=error.message;}finally{button.disabled=false;}
+};
+$('restoreForm').onsubmit=async e=>{
+  e.preventDefault();if(!session)return;const id=$('restoreNoteId').value.trim().toLowerCase();const output=$('restoreResult');
+  if(!recoveryPreview||recoveryPreview.id!==id||!$('restoreConfirm').checked){output.textContent='먼저 사본을 검증하고 버전·변경 항목을 확인하세요.';return;}
+  const button=$('restoreNote');button.disabled=true;
+  try{const data=await recoveryRequest(id,{expectedVersion:recoveryPreview.version,expectedState:recoveryPreview.stateVersion});
+    if(data.verified!==true||data.id!==id)throw Error('복구 결과 확인 필요');
+    output.textContent='HTTP 200 · 복구 완료 · 사본 재검증 및 대상 ID·소유자·본문 지문 확인';
+    invalidateRecoveryPreview();await load();
+  }catch(error){invalidateRecoveryPreview();output.textContent=error.message+' · 사본을 다시 검증하세요.';}finally{button.disabled=false;}
+};
 const savedToken=sessionStorage.getItem('byte-back-access-token');if(savedToken)await render({access_token:savedToken});else await render(null);
