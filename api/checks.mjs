@@ -11,7 +11,7 @@ export default async function handler(req,res) {
   const query = req.query ?? {};
   if(Object.keys(query).length===0){
     try{
-      const receipt=JSON.parse(await readFile(new URL('../artifacts/checks.json',import.meta.url),'utf8'));
+      const receipt=JSON.parse(await readFile(new URL('../artifacts/submission.json',import.meta.url),'utf8'));
       return res.status(200).json(summarizeChecks(receipt));
     }catch{return res.status(503).json({error:'checks_unavailable'});}
   }

@@ -15,7 +15,7 @@ if (!process.argv.includes('--local')) {
     const receipt={commit:process.env.VERCEL_GIT_COMMIT_SHA,checkedAt:new Date().toISOString(),attackAttempts:await runAttackChecks(config)};
     summarizeChecks(receipt);
     await mkdir(resolve(root,'artifacts'),{recursive:true});
-    await writeFile(resolve(root,'artifacts/checks.json'),JSON.stringify(receipt)+'\n','utf8');
+    await writeFile(resolve(root,'artifacts/submission.json'),JSON.stringify(receipt)+'\n','utf8');
   }
 }
 console.log('공개 메모 없이 서버 API용 화면을 준비했습니다.');

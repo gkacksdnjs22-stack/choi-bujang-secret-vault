@@ -4,6 +4,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "public",
   "env": { "RESOURCE_POLICY_MODE": "enforce" },
-  "functions": { "api/checks.mjs": { "includeFiles": "artifacts/checks.json" } },
+  "functions": { "api/checks.mjs": { "includeFiles": "artifacts/submission.json" } },
   "headers": [{ "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] }]
 }

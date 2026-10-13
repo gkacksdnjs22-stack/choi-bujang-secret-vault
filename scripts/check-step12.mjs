@@ -45,7 +45,7 @@ context.fetch=async()=>new Response('{}',{status:503});await vm.runInContext('lo
 assert.equal(el('receipt').textContent.includes('20'),false);
 console.log('step12: evidence IDs, GET-only, supported observations, failure/not_run accounting and API-to-screen counts passed');
 
-const receiptPath=new URL('../artifacts/checks.json',import.meta.url);
+const receiptPath=new URL('../artifacts/submission.json',import.meta.url);
 let previous;try{previous=await readFile(receiptPath);}catch{}
 await mkdir(new URL('../artifacts/',import.meta.url),{recursive:true});
 const {default:checks}=await import('../api/checks.mjs');
@@ -54,6 +54,12 @@ async function call(query={},method='GET'){
  await checks({method,query},res);return res;
 }
 try{
+ await writeFile(receiptPath,JSON.stringify(receipt));
+ assert.deepEqual((await call()).data,summary);
+ const allUnrun={...receipt,attackAttempts:receipt.attackAttempts.map(a=>({...a,observed:'not_run',result:'not_run'}))};
+ await writeFile(receiptPath,JSON.stringify(allUnrun));
+ const reread=(await call()).data;
+ assert.deepEqual([reread.total,reread.blocked,reread.failed,reread.notRun],[18,0,0,18]);
  await writeFile(receiptPath,JSON.stringify(receipt));
  assert.deepEqual((await call()).data,summary);
  assert.equal((await call({case:'s08-own'})).data.ready,true);
