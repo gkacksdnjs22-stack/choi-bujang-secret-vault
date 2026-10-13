@@ -12,7 +12,8 @@ function permittedResourceRoute(request) {
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (typeof path === 'string' && path.startsWith('/notes/')) {
     const id = path.slice('/notes/'.length);
-    return (uuid.test(id) || id === 'demo')
+    const demoOwner = id === 'demo' && request.subjectId === 'learner_fixture';
+    return (uuid.test(id) || demoOwner)
       && ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} /notes/:id`;
   }
   // 강사 역할 계약이 없으므로 공지 쓰기는 거부하고 API에서 실제 권한을 다시 확인합니다.
