@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:server": "node scripts/check-server-api.mjs",
     "build": "node scripts/build-public.mjs",
     "test:r5": "node --test test/r5.test.mjs",
     "bundle": "node scripts/bundle.mjs",
