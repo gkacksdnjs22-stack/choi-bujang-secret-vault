@@ -28,4 +28,4 @@ for(const factory of [createDecider,standalone.createDecider]) {
     assert.equal((await granted({...normal,[key]:value})).decision,'deny');count++;
   }
 }
-console.log(`판정 진입점 회귀 ${count}건 통과: 독립/기본/서버 팩토리 모두 권한 없으면 거부, 정확한 서버 권한만 허용.`);
+console.log(`판정 진입점 회귀 ${count}건 통과: 서버 연결 없는 기본/격리 실행과 빈 권한은 거부. 서버 연결의 정상 허용은 check-engine-policy.mjs에서 별도 검증.`);

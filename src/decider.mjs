@@ -51,8 +51,15 @@ export function createDecider(grants) {
 }
 
 export async function decide(request) {
-  // 권한 등록부를 공급받지 않은 독립 실행은 거부합니다. 요청 자체로 권한을 만들지 않습니다.
-  return decideWithGrants(request, []);
+  // 엔진이 확인한 18개 항목만 받습니다. HTTP 본문을 이 함수에 직접 연결하지 않습니다.
+  // 실제 서버 등록부를 매번 조회합니다. 연결/등록 실패를 연습용 허용으로 대신하지 않습니다.
+  if (request?.deviceRegistered === true) {
+    try {
+      const { runtimeDecision } = await import('./engine-resource-policy.mjs');
+      return await runtimeDecision(request);
+    } catch { /* 독립 격리 실행 또는 서버 연결 실패는 거부 */ }
+  }
+  return decideWithGrants(request ?? {}, []);
 }
 
 async function decideWithGrants(request, grants) {

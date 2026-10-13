@@ -1,10 +1,9 @@
 import { serverDeviceContext } from './server-device.mjs';
-import { decideOwnedResource } from './ownership-decider.mjs';
+import { createEngineDecision } from './engine-resource-policy.mjs';
 
 export async function enforceServerResourcePolicy({ req, res, db, config, identity, resource, id }) {
-  // 기존 사이트는 명시적으로 활성화하기 전까지 유지합니다. 알 수 없는 모드는 거부합니다.
-  const mode = process.env.RESOURCE_POLICY_MODE ?? 'off';
-  if (mode === 'off') return true;
+  // 설정 누락도 동일한 권한 검사를 수행합니다. off를 우회 경로로 사용하지 않습니다.
+  const mode = process.env.RESOURCE_POLICY_MODE ?? 'enforce';
   if (mode !== 'enforce') { res.status(503).json({ error: '권한 설정을 확인하세요.' }); return false; }
   const context = serverDeviceContext(req, res, identity, config, process.env.SUPABASE_SECRET_KEY);
   const { data: registration, error } = await db.from('principal_bindings').select('user_id,expires_at')
@@ -18,7 +17,7 @@ export async function enforceServerResourcePolicy({ req, res, db, config, identi
     at: new Date().toISOString(), policyRevision: 1, deviceRegistered: registered,
     stepUp: { verified: false, authAgeSeconds: null }, recentEvents: [], signals: { source: 'none', region: 'unknown', network: 'unknown', hour: 0 } };
   // 연결 등록 상태는 관리자 등록부의 현재 값으로 결정합니다.
-  const decision = await decideOwnedResource({ db, config, identity, request });
+  const decision = await createEngineDecision({db,config})(request,identity.userId);
   if (decision.decision === 'allow') return true;
   res.status(403).json({ error: '등록된 접속과 자료 접근 권한을 확인하세요.', reasonCode: decision.reasonCode });
   return false;

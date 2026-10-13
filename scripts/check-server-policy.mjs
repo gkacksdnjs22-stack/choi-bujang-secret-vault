@@ -33,6 +33,9 @@ tables.notes[0].owner_id='B'; assert.equal((await run()).allowed,false); tables.
 assert.equal((await run('A',{cookie},'GET',null)).allowed,true);
 assert.equal((await run('A',{cookie},'POST',null)).allowed,true);
 registrations[0].enabled=false; assert.equal((await run()).allowed,false);
+delete process.env.RESOURCE_POLICY_MODE; assert.equal((await run()).allowed,false);
+registrations[0].enabled=true; assert.equal((await run()).allowed,true);
+process.env.RESOURCE_POLICY_MODE='off'; assert.equal((await run()).res.code,503);
 process.env.RESOURCE_POLICY_MODE='unexpected'; assert.equal((await run()).res.code,503);
 globalThis.__deviceFixture = { createClient: () => db, createLoginVerifier: () => async header =>
   header === 'fixture_A' ? {kind:'student',userId:'A'} : null };
