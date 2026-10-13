@@ -29,10 +29,10 @@ assert.deepEqual(attempts.map(a=>a.attackId).sort(),['s02-static-copy','s03-unau
 const receipt={commit:'a'.repeat(40),checkedAt:new Date().toISOString(),attackAttempts:attempts};
 const summary=summarizeChecks(receipt);
 assert.deepEqual([summary.total,summary.blocked,summary.failed,summary.notRun],[13,13,0,0]);
-assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{result:'blocked',observed:'not_run'}]}));
+assert.equal(summarizeChecks({...receipt,attackAttempts:[{result:'blocked',observed:'not_run'}]}).notRun,1);
 assert.throws(()=>summarizeChecks({...receipt,checkedAt:'invalid'}));
-assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s11-manifest',result:'blocked',observed:'HTTP 200'}]}));
-assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s08-own',result:'blocked',observed:'HTTP 200; jsonReady=true'}]}));
+assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s11-manifest',stage:11,expected:'manifest',result:'blocked',observed:'HTTP 200'}]}));
+assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s08-own',stage:8,expected:'own',result:'blocked',observed:'HTTP 200; jsonReady=true'}]}));
 assert.deepEqual(Object.keys(summary).sort(),['checkedAt','commit','total','blocked','notRun','failed'].sort());
 // Render exactly the API counts, including unexpected failures; no guessed totals.
 const source=await readFile(new URL('../public/operations.mjs',import.meta.url),'utf8');
@@ -66,6 +66,12 @@ try{
  assert.equal((await call({case:'s08-own'})).data.ready,true);
  assert.equal((await call({},'POST')).code,405);
  assert.equal((await call({owner:'other'})).code,400);
+ const incomplete41={...receipt,attackAttempts:Array.from({length:41},()=>({result:'blocked',observed:'HTTP 403'}))};
+ await writeFile(receiptPath,JSON.stringify(incomplete41));
+ assert.deepEqual([(await call()).code,...['total','blocked','failed','notRun'].map(k=>(summarizeChecks(incomplete41))[k])],[200,41,0,0,41]);
+ const apiIncomplete=(await call()).data;
+ assert.deepEqual([apiIncomplete.total,apiIncomplete.blocked,apiIncomplete.failed,apiIncomplete.notRun],[41,0,0,41]);
+ await rm(receiptPath);assert.equal((await call()).code,503);
  await writeFile(receiptPath,'{}');assert.equal((await call()).code,503);
  console.log('step12: stored receipt API, invalid receipt, read-only and existing virtual-case boundaries passed');
 }finally{if(previous)await writeFile(receiptPath,previous);else await rm(receiptPath,{force:true});}
@@ -83,3 +89,19 @@ assert.deepEqual(cells.map(c=>c.textContent),['13','0','0','13']);
 rootContext.fetch=async()=>new Response('{}',{status:503});await vm.runInContext('loadOps()',rootContext);
 assert.deepEqual(cells.map(c=>c.textContent),['-','-','-','-']);
 console.log('step12: official root count slots, all-unrun and unavailable record display passed');
+
+// Requested 41-case boundary: absent/incomplete observations never become successes.
+const fixture=(i,result,observed)=>({attackId:'review-'+i,stage:12,expected:'deny unauthorized',result,observed});
+const count=attackAttempts=>summarizeChecks({...receipt,attackAttempts});
+const fields=s=>[s.total,s.blocked,s.failed,s.notRun];
+assert.deepEqual(fields(count(Array.from({length:41},(_,i)=>fixture(i,'not_run','not_run')))),[41,0,0,41]);
+assert.deepEqual(fields(count(Array.from({length:41},()=>({result:'blocked',observed:'HTTP 403'})))),[41,0,0,41]);
+assert.deepEqual(fields(count(Array.from({length:41},(_,i)=>({...fixture(i,'breached',undefined)})))),[41,0,0,41]);
+assert.deepEqual(fields(count([fixture(1,'blocked','HTTP 403'),fixture(2,'breached','HTTP 200')])),[2,1,1,0]);
+const mixed=[...Array.from({length:41},(_,i)=>fixture(i,'not_run','not_run')),fixture(42,'blocked','HTTP 401'),fixture(43,'breached','HTTP 200')];
+assert.deepEqual(fields(count(mixed)),[43,1,1,41]);
+assert.equal(count([fixture(1,'blocked','network_error')]).notRun,1);
+assert.equal(count([null,{},fixture(1,undefined,'HTTP 403')]).notRun,3);
+assert.throws(()=>count([]),/invalid_check_receipt/);
+assert.equal(count(mixed).total,count(mixed).blocked+count(mixed).failed+count(mixed).notRun);
+console.log('step12: 41 unrun, incomplete observations, actual deny/allow and mixed totals passed');
