@@ -20,7 +20,8 @@ export function apiResourceTarget(req, resource) {
     if ([...params.keys()].some(key => key !== 'id') || params.getAll('id').length > 1) return { invalid: true };
     const pathId = path.startsWith(`${prefix}/`) ? path.slice(prefix.length + 1) : undefined;
     if (path !== prefix && (!pathId || !UUID_PATTERN.test(pathId))) return { invalid: true };
-    if (pathId && params.has('id')) return { invalid: true };
+    // 동적 Vercel 경로는 같은 ID를 쿼리에도 전달할 수 있습니다. 서로 다른 ID는 거부합니다.
+    if (pathId && params.has('id') && params.get('id') !== pathId) return { invalid: true };
     const id = pathId ?? params.get('id') ?? undefined;
     return id && !UUID_PATTERN.test(id) ? { invalid: true } : { id };
   }

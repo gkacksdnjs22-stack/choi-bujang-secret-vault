@@ -80,6 +80,9 @@ async function request(handler, user, method, url, body) {
 assert.equal((await request(notes, 'A', 'GET', `/api/notes/${id}`)).value.resourceId, `notes:${id}`);
 assert.equal((await request(notes, 'A', 'PUT', `/api/notes/${id}`, { title: 'own edit', body: 'fixture' })).code, 200);
 assert.equal((await request(notes, 'A', 'GET', `/api/notes?id=${id}`)).code, 200);
+assert.equal((await request(notes, 'A', 'GET', `/api/notes/${id}?id=${id}`)).code, 200);
+assert.equal((await request(notes, 'B', 'GET', `/api/notes/${id}?id=${id}`)).code, 404);
+assert.equal((await request(notes, 'A', 'GET', `/api/notes/${id}?id=00000000-0000-4000-8000-000000000099`)).code, 400);
 assert.equal((await request(notes, 'B', 'GET', `/api/notes?id=${id}`)).code, 404);
 assert.equal((await request(notes, 'A', 'PATCH', `/api/notes/${id}`, {})).code, 403);
 assert.equal((await request(notes, 'A', 'GET', '/api/notes?action=export')).code, 400);
