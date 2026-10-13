@@ -1,21 +1,15 @@
 export const RESOURCE_IDS = Object.freeze({ notes: 'notes', announcements: 'announcements' });
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// 정확한 경로와 동작만 허용하며 :id 자리에 기능 이름은 허용하지 않습니다.
-export function permittedResourceRoute(request) {
-  if (request.service !== 'notes' || typeof request.subjectId !== 'string' || !request.subjectId
-      || !/^[a-f0-9]{16}$/.test(request.deviceId ?? '')) return false;
-  const { method, path, route } = request;
-  if (path === '/notes') return ['GET', 'POST'].includes(method) && route === `${method} /notes`;
-  if (typeof path === 'string' && path.startsWith('/notes/')) {
-    return UUID_PATTERN.test(path.slice('/notes/'.length))
-      && ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} /notes/:id`;
-  }
-  // 계약에는 강사 역할이 없으므로 판정기에서 공지 쓰기를 허용하지 않습니다.
-  if (path === '/announcements') return method === 'GET' && route === 'GET /announcements';
-  return typeof path === 'string' && path.startsWith('/announcements/')
-    && UUID_PATTERN.test(path.slice('/announcements/'.length))
-    && method === 'GET' && route === 'GET /announcements/:id';
+// 서버 설정의 구역은 접근 범위를 정하고, 실제 소유자·강사 권한 검사는 API가 수행합니다.
+export function resourceRouteAllowed(config, resource, method, id) {
+  if (!['notes', 'announcements'].includes(resource)) return false;
+  const pathPattern = '/api/' + resource + (id ? '/:id' : '');
+  const zone = resource === 'notes' ? 'my-notes'
+    : method === 'GET' ? 'class-notices' : 'instructor-materials';
+  const matches = (config.allowedRoutes ?? []).filter(entry => entry
+    && entry.service === resource && entry.method === method && entry.pathPattern === pathPattern);
+  return matches.length === 1 && matches[0].zone === zone;
 }
 
 export function apiResourceTarget(req, resource) {

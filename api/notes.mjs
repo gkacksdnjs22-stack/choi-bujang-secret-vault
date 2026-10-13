@@ -1,8 +1,9 @@
+import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { createLoginVerifier } from '../src/verify-login.mjs';
-import { apiResourceTarget } from '../src/resource-routes.mjs';
+import { resourceRouteAllowed, apiResourceTarget } from '../src/resource-routes.mjs';
 const config = JSON.parse(readFileSync(new URL('../aleph.config.json', import.meta.url), 'utf8'));
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let verify;
@@ -19,9 +20,11 @@ export default async function handler(req, res) {
     const target = apiResourceTarget(req, 'notes');
     if (target.invalid) return res.status(400).json({error:'허용되지 않은 자료 경로입니다.',reasonCode:'resource_path_denied'});
     const id = target.id;
+    if (!resourceRouteAllowed(config, 'notes', req.method, id)) return res.status(403).json({error:'허용되지 않은 자료 구역 또는 동작입니다.',reasonCode:'resource_zone_denied'});
     if (req.method === 'POST' && id) return res.status(405).json({error:'메모 추가는 목록 경로에서만 허용합니다.'});
     if (id && (typeof id !== 'string' || !uuid.test(id))) return res.status(400).json({error:'올바른 메모 ID가 필요합니다.'});
     const shape = row => ({id:row.public_id,title:row.title,body:row.content,resourceId:`notes:${row.public_id}`});
+    if (!await enforceServerResourcePolicy({ req, res, db, config, identity, resource: 'notes', id })) return res;
     if (req.method === 'GET') {
       let query = db.from('notes').select('public_id,title,content');
       if(id) query=query.eq('public_id',id).eq('owner_id',identity.userId).maybeSingle();

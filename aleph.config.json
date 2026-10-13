@@ -10,14 +10,78 @@
     "jwksUrl": "https://mhcjrsyvngiokcoljeet.supabase.co/auth/v1/.well-known/jwks.json"
   },
   "allowedRoutes": [
-    "GET /api/notes",
-    "POST /api/notes",
-    "GET /api/notes/:id",
-    "PUT /api/notes/:id",
-    "DELETE /api/notes/:id",
-    "POST /api/auth",
-    "GET /api/announcements",
-    "GET /api/announcements/:id"
+    {
+      "service": "notes",
+      "method": "GET",
+      "pathPattern": "/api/notes",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "POST",
+      "pathPattern": "/api/notes",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "GET",
+      "pathPattern": "/api/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "PUT",
+      "pathPattern": "/api/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "DELETE",
+      "pathPattern": "/api/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "auth",
+      "method": "POST",
+      "pathPattern": "/api/auth",
+      "zone": "authentication"
+    },
+    {
+      "service": "announcements",
+      "method": "GET",
+      "pathPattern": "/api/announcements",
+      "zone": "class-notices"
+    },
+    {
+      "service": "announcements",
+      "method": "GET",
+      "pathPattern": "/api/announcements/:id",
+      "zone": "class-notices"
+    },
+    {
+      "service": "announcements",
+      "method": "POST",
+      "pathPattern": "/api/announcements",
+      "zone": "instructor-materials"
+    },
+    {
+      "service": "announcements",
+      "method": "PUT",
+      "pathPattern": "/api/announcements/:id",
+      "zone": "instructor-materials"
+    },
+    {
+      "service": "announcements",
+      "method": "DELETE",
+      "pathPattern": "/api/announcements/:id",
+      "zone": "instructor-materials"
+    },
+    {
+      "service": "device",
+      "method": "GET",
+      "pathPattern": "/api/device",
+      "zone": "device-registration"
+    }
   ],
   "originalApiUrl": "https://mhcjrsyvngiokcoljeet.supabase.co/rest/v1/notes",
   "restoreRoute": null

@@ -1,8 +1,9 @@
+import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { createLoginVerifier } from '../src/verify-login.mjs';
-import { apiResourceTarget, UUID_PATTERN } from '../src/resource-routes.mjs';
+import { resourceRouteAllowed, apiResourceTarget, UUID_PATTERN } from '../src/resource-routes.mjs';
 const config = JSON.parse(readFileSync(new URL('../aleph.config.json', import.meta.url), 'utf8'));
 let verify;
 export default async function handler(req, res) {
@@ -16,8 +17,10 @@ export default async function handler(req, res) {
     const target = apiResourceTarget(req, 'announcements');
     if (target.invalid) return res.status(400).json({ error: '허용되지 않은 자료 경로입니다.' });
     const { id } = target;
+    if (!resourceRouteAllowed(config, 'announcements', req.method, id)) return res.status(403).json({error:'허용되지 않은 자료 구역 또는 동작입니다.',reasonCode:'resource_zone_denied'});
     const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
     if (!['GET', 'POST', 'PUT', 'DELETE'].includes(req.method)) return res.status(405).json({ error: '지원하지 않는 요청입니다.' });
+    if (!await enforceServerResourcePolicy({ req, res, db, config, identity, resource: 'announcements', id })) return res;
     if (req.method !== 'GET') {
       const { data: membership, error } = await db.from('instructor_memberships').select('enabled')
         .eq('user_id', identity.userId).eq('enabled', true).maybeSingle();
