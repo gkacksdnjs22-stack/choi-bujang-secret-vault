@@ -35,5 +35,9 @@ export async function runAttackChecks(config) {
     const deviceResponse=await fetch(new URL('/api/device',app),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',redirect:'error',signal:AbortSignal.timeout(10000)});
     attempts.push({attackId:'s11-anonymous-approval',expected:'무로그인 기기 승인 신청 거부',observed:`HTTP ${deviceResponse.status}`});
   }
+  if(config.step>=12){
+    const response=await fetch(new URL('/api/operations',app),{redirect:'error',signal:AbortSignal.timeout(10000)});
+    attempts.push({attackId:'s12-anonymous-operations',expected:'무로그인 작전실 요약 거부',observed:`HTTP ${response.status}`});
+  }
   return attempts;
 }
