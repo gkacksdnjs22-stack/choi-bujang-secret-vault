@@ -43,4 +43,5 @@ try{
   assert.equal((await browserFetch('/api/notes')).status,200);
   assert.equal((await browserFetch('/api/notes/'+req.url.split('/').at(-1).split('?')[0],{method:'PUT',body:JSON.stringify({body:'virtual',title:'virtual'})})).status,200);
 }finally{globalThis.fetch=originalFetch;if(originalLocation===undefined)delete globalThis.location;else globalThis.location=originalLocation;}
+req=signedFixture({method:'GET',url:'/api/notes',headers:{}},'B',config);req.body='';assert.equal(await check(req),true);
 console.log('요청 서명 정상·재사용·경로/본문/동작/쿼리 변조·누락·타인·시간·DB장애·플랫폼 경로 정규화 경계 통과 (가상 nonce DB).');

@@ -10,7 +10,7 @@ document.getElementById('run').onclick=async()=>{
   };
   try{
     const signed=createProtectedFetch(()=>({}));
-    const notes=await record('정상 서명',await signed('/api/notes'),200);
+    const notes=await record('정상 서명',await signed('/api/notes',{headers:{'Content-Type':'application/json'}}),200);
     if(!Array.isArray(notes))throw Error('본인 정상 요청을 먼저 확인해야 합니다.');
     await record('서명 누락',await fetch('/api/notes'),403);
     const changedPath=createProtectedFetch(()=>({}),(path,options)=>fetch('/api/announcements',options));

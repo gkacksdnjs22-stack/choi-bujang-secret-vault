@@ -3,6 +3,7 @@ import {serverDeviceContext} from './server-device.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 export function canonicalBody(value){
+  if(value==='')value=undefined;
   if(typeof value==='string')value=JSON.parse(value);
   const normalize=x=>Array.isArray(x)?x.map(normalize):x&&typeof x==='object'
     ?Object.fromEntries(Object.keys(x).sort().map(key=>[key,normalize(x[key])])):x;
