@@ -1,5 +1,5 @@
 {
-  "step": 10,
+  "step": 11,
   "repoUrl": "https://github.com/gkacksdnjs22-stack/choi-bujang-secret-vault",
   "publicAppUrl": "https://choi-bujang-secret-vault-qovm.vercel.app",
   "sampleMarker": "SAMPLE_NOTE_1",
@@ -87,6 +87,12 @@
       "method": "POST",
       "pathPattern": "/api/restore/:id",
       "zone": "my-notes"
+    },
+    {
+      "service": "auth",
+      "method": "POST",
+      "pathPattern": "/api/device",
+      "zone": "device-registration"
     }
   ],
   "originalApiUrl": "https://mhcjrsyvngiokcoljeet.supabase.co/rest/v1/notes",

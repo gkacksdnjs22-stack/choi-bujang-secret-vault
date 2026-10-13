@@ -1,3 +1,4 @@
+import {requestAuthorization} from '../../src/session-cookie.mjs';
 import {readFileSync} from 'node:fs';
 import {createClient} from '@supabase/supabase-js';
 import {createLoginVerifier} from '../../src/verify-login.mjs';
@@ -13,7 +14,7 @@ export default async function handler(req,res) {
   if(!key||!url)return res.status(503).json({error:'복구 서버 설정이 필요합니다.'});
   try {
     verify??=createLoginVerifier({config,supabaseSecretKey:key});
-    const identity=await verify(req.headers?.authorization);
+    const identity=await verify(requestAuthorization(req,config));
     if(!identity)return res.status(401).json({error:'로그인이 필요합니다.'});
     const path=new URL(req.url,'https://local.invalid');
     const match=/^\/api\/restore\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.exec(path.pathname);

@@ -1,3 +1,4 @@
+import {requestAuthorization} from '../src/session-cookie.mjs';
 import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -14,7 +15,7 @@ export default async function handler(req, res) {
   if (!key || !url) return res.status(503).json({error:'서버 연결 설정이 필요합니다.'});
   try {
     verify ??= createLoginVerifier({config, supabaseSecretKey:key});
-    const identity = await verify(req.headers.authorization);
+    const identity = await verify(requestAuthorization(req,config));
     if (!identity) return res.status(401).json({error:'로그인이 필요합니다.'});
     const db = createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
     const target = apiResourceTarget(req, 'notes');

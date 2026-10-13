@@ -1,0 +1,12 @@
+{
+  "id": "/",
+  "name": "나의 안전 자료실",
+  "short_name": "안전 자료실",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "ko",
+  "background_color": "#eef6fa",
+  "theme_color": "#d9eef9",
+  "icons": [{"src":"/vault-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}
