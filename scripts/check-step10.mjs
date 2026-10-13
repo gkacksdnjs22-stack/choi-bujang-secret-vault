@@ -48,6 +48,9 @@ const request=async(method,url,auth,body)=>{
 assert.equal((await request('GET','/api/restore/'+id)).code,405);
 assert.equal((await request('POST','/api/restore/'+id)).code,401);
 assert.equal((await request('POST','/api/restore/'+id+'?owner=B','virtual_B')).code,400);
+assert.equal((await request('POST','/api/restore/'+id+'?noteId='+id,'virtual_B',{})).code,200);
+assert.equal((await request('POST','/api/restore/'+id+'?noteId='+other,'virtual_B',{})).code,400);
+assert.equal((await request('POST','/api/restore/'+id+'?noteId='+id+'&noteId='+id,'virtual_B',{})).code,400);
 assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{role:'admin'})).code,400);
 assert.equal((await request('POST','/api/restore/'+id,'virtual_B',{})).code,200);
 registered=false;

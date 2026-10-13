@@ -18,11 +18,15 @@ export default async function handler(req,res) {
     const path=new URL(req.url,'https://local.invalid');
     const match=/^\/api\/restore\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.exec(path.pathname);
     const body=typeof req.body==='string'?JSON.parse(req.body):req.body;
-    if(!match||path.search||(body!=null&&(typeof body!=='object'||Array.isArray(body)||Object.keys(body).length)))
+    const parameters=path.searchParams;
+    // Vercel 동적 경로가 전달하는 동일 noteId만 정규화합니다. 다른 대상·추가 기능 쿼리는 거부합니다.
+    const invalidQuery=[...parameters.keys()].some(key=>key!=='noteId')||parameters.getAll('noteId').length>1
+      ||(parameters.has('noteId')&&parameters.get('noteId')!==match?.[1]);
+    if(!match||invalidQuery||(body!=null&&(typeof body!=='object'||Array.isArray(body)||Object.keys(body).length)))
       return res.status(400).json({error:'자료 ID 한 개만 지정하세요.'});
     const context=serverDeviceContext(req,res,identity,config,key);
     const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
-    return res.status(200).json(await restorePrivateNote({db,noteId:match[1],identity,context}));
+    return res.status(200).json(await restorePrivateNote({db,noteId:match[1].toLowerCase(),identity,context}));
   }catch(error){
     if(error.message==='restore_unavailable')return res.status(503).json({error:'복구 DB 설정이 필요합니다.'});
     return res.status(403).json({error:'사본·소유권·등록 상태를 확인하세요.',reasonCode:'restore_rejected'});
