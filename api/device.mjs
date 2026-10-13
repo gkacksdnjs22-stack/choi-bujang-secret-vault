@@ -1,3 +1,4 @@
+import {traceRequest} from '../src/request-trace.mjs';
 import {requestAuthorization} from '../src/session-cookie.mjs';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
@@ -6,6 +7,7 @@ import { serverDeviceContext } from '../src/server-device.mjs';
 const config = JSON.parse(readFileSync(new URL('../aleph.config.json', import.meta.url)));
 let verify;
 export default async function handler(req, res) {
+  traceRequest(res);
   res.setHeader('Cache-Control', 'no-store');
   if (!['GET','POST'].includes(req.method)) return res.status(405).json({ error: '조회 또는 승인 요청만 가능합니다.' });
   const secret = process.env.SUPABASE_SECRET_KEY, url = process.env.SUPABASE_URL;

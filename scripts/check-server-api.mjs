@@ -45,7 +45,7 @@ class Query {
     return Promise.resolve({data:this.single?(found[0]??null):found,error:null}).then(resolve,reject);
   }
 }
-globalThis.__serverApiFixture = {createClient:()=>({from:table=>new Query(table),async rpc(name,args){if(dbFailure)return {error:{message:'fixture outage'}};const nonce=args.p_certificate_id+args.p_nonce;if(usedProofNonces.has(nonce))return {data:false};usedProofNonces.add(nonce);return {data:true};}}),
+globalThis.__serverApiFixture = {createClient:()=>({from:table=>new Query(table),async rpc(name,args){if(dbFailure)return {error:{message:'fixture outage'}};if(name==='preview_private_note_recovery')return {data:{verified:true,version:'a'.repeat(64),capturedAt:new Date().toISOString(),changedFields:[]}};const nonce=args.p_certificate_id+args.p_nonce;if(usedProofNonces.has(nonce))return {data:false};usedProofNonces.add(nonce);return {data:true};}}),
   createLoginVerifier:()=>async header=>['fixture_A','fixture_B','fixture_I'].includes(header)
     ?{kind:'student',userId:header.slice(-1)}:null};
 registerHooks({resolve(specifier,context,next){
@@ -59,6 +59,19 @@ async function call(handler,user,method,url,body,cookie=cookies[user]) {
   const res=response();await handler(signedFixture({method,url,headers:{authorization:'fixture_'+user,cookie},body},user,config),res);
   assert.equal(res.headers['Cache-Control'],'no-store');return res;
 }
+const {default:operations}=await import('../api/operations.mjs');
+const operationsResult=await call(operations,'A','GET','/api/operations');
+assert.equal(operationsResult.code,200);assert.equal(operationsResult.value.ownNoteCount,1);
+assert.equal(operationsResult.value.recovery.versions[0].state,'verified');
+assert.equal(operationsResult.value.detection.eventCount,null);
+assert.equal(operationsResult.value.officialTests.executed,0);
+assert.equal(JSON.stringify(operationsResult.value).includes('fixture'),false);
+assert.match(operationsResult.headers['X-Vault-Request-Id'],/^[a-f0-9-]{36}$/);
+assert.equal((await call(operations,'B','GET','/api/operations')).value.ownNoteCount,0);
+assert.equal((await call(operations,'A','POST','/api/operations')).code,405);
+assert.equal((await call(operations,'A','GET','/api/operations?owner=B')).code,400);
+const unsignedOperations=response();await operations({method:'GET',url:'/api/operations',headers:{authorization:'fixture_A',cookie:cookies.A}},unsignedOperations);assert.equal(unsignedOperations.code,403);
+console.log('12단계 작전실 실제 API 함수 가상 시험: 본인 집계/무본문/서명/조회범위/읽기전용 경계 통과.');
 assert.equal((await call(notes,'A','GET','/api/notes')).value.length,1);
 assert.equal((await call(notes,'B','GET','/api/notes')).value.length,0);
 assert.equal((await call(notes,'A','GET',`/api/notes/${noteId}?id=${noteId}`)).code,200);

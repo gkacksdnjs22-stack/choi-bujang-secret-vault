@@ -1,3 +1,4 @@
+import {traceRequest} from '../src/request-trace.mjs';
 import {enforceAppProof} from '../src/app-proof.mjs';
 import {requestAuthorization} from '../src/session-cookie.mjs';
 import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
@@ -9,6 +10,7 @@ import { resourceRouteAllowed, apiResourceTarget, UUID_PATTERN } from '../src/re
 const config = JSON.parse(readFileSync(new URL('../aleph.config.json', import.meta.url), 'utf8'));
 let verify;
 export default async function handler(req, res) {
+  traceRequest(res);
   res.setHeader('Cache-Control', 'no-store');
   const key = process.env.SUPABASE_SECRET_KEY, url = process.env.SUPABASE_URL;
   if (!key || !url) return res.status(503).json({ error: '서버 연결 설정이 필요합니다.' });

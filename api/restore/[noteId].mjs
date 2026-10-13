@@ -1,3 +1,4 @@
+import {traceRequest} from '../../src/request-trace.mjs';
 import {enforceAppProof} from '../../src/app-proof.mjs';
 import {requestAuthorization} from '../../src/session-cookie.mjs';
 import {readFileSync} from 'node:fs';
@@ -8,6 +9,7 @@ import {restorePrivateNote,previewPrivateNote} from '../../src/recovery.mjs';
 const config=JSON.parse(readFileSync(new URL('../../aleph.config.json',import.meta.url),'utf8'));
 let verify;
 export default async function handler(req,res) {
+  traceRequest(res);
   res.setHeader('Cache-Control','no-store');
   if(req.method!=='POST'){res.setHeader('Allow','POST');return res.status(405).json({error:'POST가 필요합니다.'});}
   if((process.env.RESOURCE_POLICY_MODE??'enforce')!=='enforce')return res.status(503).json({error:'권한 설정을 확인하세요.'});

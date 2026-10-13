@@ -1,3 +1,4 @@
+import {traceRequest} from '../src/request-trace.mjs';
 import {enforceAppProof} from '../src/app-proof.mjs';
 import {requestAuthorization} from '../src/session-cookie.mjs';
 import { enforceServerResourcePolicy } from '../src/server-resource-policy.mjs';
@@ -10,6 +11,7 @@ const config = JSON.parse(readFileSync(new URL('../aleph.config.json', import.me
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let verify;
 export default async function handler(req, res) {
+  traceRequest(res);
   res.setHeader('Cache-Control', 'no-store');
   const key = process.env.SUPABASE_SECRET_KEY;
   const url = process.env.SUPABASE_URL;
