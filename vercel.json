@@ -3,5 +3,6 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "public",
+  "env": { "RESOURCE_POLICY_MODE": "enforce" },
   "headers": [{ "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] }]
 }
