@@ -22,8 +22,8 @@ for (const url of [`/api/notes/${id}`,`/api/notes?id=${id}`,`/api/notes/${id}?id
   assert.equal(apiResourceTarget({url},'notes').id,id);
 }
 // 우회 모드로 API 시험하지 않습니다. 정상 허용·타인 거부를 함께 검증합니다.
-for (const script of ['check-engine-policy.mjs','check-server-api.mjs']) {
+for (const script of ['check-policy-entrypoints.mjs','check-engine-policy.mjs','check-server-api.mjs']) {
   process.stdout.write(execFileSync(process.execPath,[fileURLToPath(new URL(script,import.meta.url))],
     {encoding:'utf8',windowsHide:true}));
 }
-console.log('8단계 구역 설정·정확한 경로·기본 판정기 연결·활성 API 검증 통과 (가상 DB).');
+console.log('8단계 기본/격리 구역 판정·서버 소유권·활성 API 검증 통과 (가상 DB).');

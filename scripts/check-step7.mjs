@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createDecider, RULE_IDS } from '../src/decider.mjs';
-import { fixtureRequests, fixtureGrant } from './fixture-7.mjs';
+import { resourceFixtureRequests as fixtureRequests, fixtureGrant } from './fixture-7.mjs';
 
 const { normal, suspicious } = fixtureRequests();
 const decide = createDecider([fixtureGrant(normal)]);

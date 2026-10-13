@@ -51,15 +51,33 @@ export function createDecider(grants) {
 }
 
 export async function decide(request) {
-  // 엔진이 확인한 18개 항목만 받습니다. HTTP 본문을 이 함수에 직접 연결하지 않습니다.
-  // 실제 서버 등록부를 매번 조회합니다. 연결/등록 실패를 연습용 허용으로 대신하지 않습니다.
-  if (request?.deviceRegistered === true) {
-    try {
-      const { runtimeDecision } = await import('./engine-resource-policy.mjs');
-      return await runtimeDecision(request);
-    } catch { /* 독립 격리 실행 또는 서버 연결 실패는 거부 */ }
-  }
-  return decideWithGrants(request ?? {}, []);
+  // 공식 표본과 같은 구역 판정 진입점입니다. 소유권 판정은 엔진/최종 API가 별도로 집행합니다.
+  // 이 함수에 HTTP 본문을 직접 전달하지 않습니다. 구역 허용은 자료 반환 허가를 대신하지 않습니다.
+  const result = (decision, reasonCode, ruleId) => ({schema:'aleph.decision.v1',
+    requestId:request?.requestId,decision,reasonCode,ruleIds:[ruleId]});
+  const keys = ['schema','requestId','classId','projectId','subjectId','deviceId','service','method',
+    'path','route','queryLength','querySha256','at','policyRevision','deviceRegistered','stepUp','recentEvents','signals'];
+  if (!request || Object.keys(request).sort().join() !== keys.sort().join()
+      || request.schema !== 'aleph.decision.v1'
+      || ['requestId','classId','projectId','subjectId'].some(key=>typeof request[key]!=='string'||!request[key])
+      || !/^[a-f0-9]{16}$/.test(request.deviceId ?? '')
+      || !Number.isInteger(request.policyRevision) || request.policyRevision < 1
+      || !Number.isFinite(Date.parse(request.at)) || Math.abs(Date.now()-Date.parse(request.at))>5000
+      || request.queryLength !== 0
+      || request.querySha256 !== 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+    return result('deny','policy_denied','resource_zone');
+  if (request.deviceRegistered !== true) return result('deny','device_not_registered','device_registered');
+  const match = /^\/(api\/)?(notes|announcements)\/([a-zA-Z0-9_-]{1,128})$/.exec(request.path ?? '');
+  const reserved = new Set(['export','all','admin','search','backup','restore']);
+  if (!match || reserved.has(match[3].toLowerCase()) || request.service !== match[2]
+      || request.route !== `${request.method} /${match[1] ?? ''}${match[2]}/:id`
+      || !(match[2]==='notes'?['GET','PUT']:['GET']).includes(request.method))
+    return result('deny','policy_denied','resource_zone');
+  const verified=request.stepUp?.verified===true && Number.isInteger(request.stepUp.authAgeSeconds)
+    && request.stepUp.authAgeSeconds>=0 && request.stepUp.authAgeSeconds<=900;
+  return requiresStepUp(request) && !verified
+    ? result('step_up','step_up_required','step_up_required')
+    : result('allow','approved','resource_zone');
 }
 
 async function decideWithGrants(request, grants) {

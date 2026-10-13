@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 import { readFileSync } from 'node:fs';
 
-// 기본 decide()까지 실제 호출합니다. 서버 DB 연결만 가상화하며 권한을 요청에 추가하지 않습니다.
+// 서버 소유권 판정 진입점입니다. 구역 기본 함수와 별도 집행 단계입니다.
 globalThis.__engineFixtureDB = null;
 registerHooks({resolve(specifier,context,next) {
   if (specifier === '@supabase/supabase-js') return {url:'data:text/javascript,export const createClient=()=>globalThis.__engineFixtureDB',shortCircuit:true};
@@ -11,8 +11,7 @@ registerHooks({resolve(specifier,context,next) {
 process.env.SUPABASE_URL='https://local-fixture.invalid';
 process.env.SUPABASE_SECRET_KEY='local-engine-fixture';
 const {ruleFixture,runRuleCheck} = await import('../src/rule-check.mjs');
-const {decide} = await import('../src/decider.mjs');
-const {createEngineDecision} = await import('../src/engine-resource-policy.mjs');
+const {createEngineDecision,runtimeDecision:decide} = await import('../src/engine-resource-policy.mjs');
 const fixture = ruleFixture();
 globalThis.__engineFixtureDB=fixture.db;
 const request=fixture.request, rows=fixture.rows;
@@ -29,6 +28,15 @@ await check({...request,path:request.path.replace('/api',''),route:'GET /notes/:
 for (const method of ['GET','PUT','DELETE']) {
   await check({...request,method,route:method+' /api/notes/:id'},'allow');
   await check({...request,subjectId:'check_B',method,route:method+' /api/notes/:id'},'deny');
+}
+// 서버 소유권 판정의 반대 방향도 검증합니다.
+const bNoteId='00000000-0000-4000-8000-000000000004';
+rows.notes.push({public_id:bNoteId,owner_id:'B'});
+for (const method of ['GET','PUT','DELETE']) {
+  const bRequest={...request,subjectId:'check_B',path:'/api/notes/'+bNoteId,
+    method,route:method+' /api/notes/:id'};
+  await check(bRequest,'allow');
+  await check({...bRequest,subjectId:'check_A'},'deny');
 }
 for (const patch of [{deviceRegistered:false},{deviceId:'b'.repeat(16)},{projectId:'other'},
   {classId:'other'},{subjectId:'unregistered'},{queryLength:10},{querySha256:'0'.repeat(64)},
@@ -68,4 +76,4 @@ for (const [method,query,status] of [['GET',{case:'s08-ownership'},200],['POST',
   ['GET',{case:['s08-own']},400],['GET',{case:'s08-own',role:'instructor'},400],['GET',{case:'unknown'},400]]) {
   const res=response();await checks({method,query},res);assert.equal(res.code,status);assert.equal(res.headers['Cache-Control'],'no-store');
 }
-console.log(`기본 decide 서버 연결 ${count}건 + 공개 고정 가상 점검 7종 + 점검 API 경계 통과. 실제 계정/운영 엔진 시험은 별도입니다.`);
+console.log(`서버 소유권 판정 ${count}건 + 공개 고정 가상 점검 7종 + 점검 API 경계 통과. 실제 계정/운영 엔진 시험은 별도입니다.`);
