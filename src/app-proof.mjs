@@ -34,31 +34,36 @@ export function issueAppCertificate({publicKey,identity,context,secret,expiresAt
     publicKey:safePublicKey(publicKey),exp})).toString('base64url');
   return {certificate:payload+'.'+seal(payload,secret),expiresAt:exp};
 }
-export async function verifyAppProof({req,db,identity,context,secret,now=Date.now()}){
+export async function verifyAppProof({req,db,identity,context,secret,now=Date.now(),observe=()=>{}}){
+  let stage="headers";
   try{
     const certificate=req.headers?.['x-vault-app-certificate'];
     const signature=req.headers?.['x-vault-app-signature'];
     const time=req.headers?.['x-vault-app-time'],nonce=req.headers?.['x-vault-app-nonce'];
     if(typeof certificate!=='string'||certificate.length>4096||typeof signature!=='string'
       ||!/^[A-Za-z0-9_-]{86}$/.test(signature)||typeof time!=='string'||!/^\d{13}$/.test(time)
-      ||Math.abs(now-Number(time))>30000||!uuid.test(nonce??''))return false;
+      ||Math.abs(now-Number(time))>30000||!uuid.test(nonce??''))return (observe(stage),false);
+    stage='certificate';
     const [payload,mac,...extra]=certificate.split('.');
-    if(extra.length||!/^[a-f0-9]{64}$/.test(mac??'')||!timingSafeEqual(Buffer.from(mac,'hex'),Buffer.from(seal(payload,secret),'hex')))return false;
+    if(extra.length||!/^[a-f0-9]{64}$/.test(mac??'')||!timingSafeEqual(Buffer.from(mac,'hex'),Buffer.from(seal(payload,secret),'hex')))return (observe(stage),false);
     const cert=JSON.parse(Buffer.from(payload,'base64url').toString());
     if(cert.schema!=='vault-app-certificate-v1'||!uuid.test(cert.id)||cert.user!==identity.userId
       ||cert.class!==context.classId||cert.project!==context.projectId||cert.subject!==context.subjectId||cert.device!==context.deviceId
-      ||!Number.isSafeInteger(cert.exp)||cert.exp<=now||cert.exp>now+600000)return false;
+      ||!Number.isSafeInteger(cert.exp)||cert.exp<=now||cert.exp>now+600000)return (observe(stage),false);
+    stage='signature';
     const key=createPublicKey({key:safePublicKey(cert.publicKey),format:'jwk'});
     if(!verify('sha256',Buffer.from(proofMessage({method:req.method,url:req.url,body:req.body,certificate,time,nonce})),
-      {key,dsaEncoding:'ieee-p1363'},Buffer.from(signature,'base64url')))return false;
+      {key,dsaEncoding:'ieee-p1363'},Buffer.from(signature,'base64url')))return (observe(stage),false);
+    stage='nonce';
     const {data,error}=await db.rpc('consume_app_request_nonce',{p_certificate_id:cert.id,p_nonce:nonce,p_expires_at:new Date(cert.exp).toISOString()});
-    return !error&&data===true;
-  }catch{return false;}
+    if(error||data!==true)return (observe(stage),false);return true;
+  }catch{return (observe(stage),false);}
 }
 export async function enforceAppProof({req,res,db,identity,config,context}){
   if(config.step<11)return true;
   const secret=process.env.SUPABASE_SECRET_KEY;
   context??=serverDeviceContext(req,res,identity,config,secret);
-  if(await verifyAppProof({req,db,identity,context,secret}))return true;
-  res.status(403).json({error:'요청 서명을 다시 확인하세요.',reasonCode:'app_proof_invalid'});return false;
+  let proofStage;
+  if(await verifyAppProof({req,db,identity,context,secret,observe:value=>{proofStage=value;}}))return true;
+  res.status(403).json({error:'요청 서명을 다시 확인하세요.',reasonCode:'app_proof_invalid',proofStage});return false;
 }

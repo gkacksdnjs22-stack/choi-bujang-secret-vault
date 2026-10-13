@@ -5,7 +5,7 @@ document.getElementById('run').onclick=async()=>{
   const record=async(label,response,expected)=>{
     let data;try{data=await response.json();}catch{}
     const passed=response.status===expected&&(expected!==403||data?.reasonCode==='app_proof_invalid');
-    results.push(`${label}: HTTP ${response.status} · ${passed?'통과':'실패'}${data?.reasonCode?' · '+data.reasonCode:''}`);
+    results.push(`${label}: HTTP ${response.status} · ${passed?'통과':'실패'}${data?.reasonCode?' · '+data.reasonCode:''}${data?.proofStage?' · '+data.proofStage:''}`);
     return data;
   };
   try{
