@@ -18,12 +18,12 @@ assert.equal(resourceRouteAllowed(duplicateRoute, 'notes', 'GET', 'example'), fa
 const id = '00000000-0000-4000-8000-000000000001';
 const { normal } = fixtureRequests();
 const isolated = await import(`data:text/javascript;base64,${readFileSync(new URL('../src/decider.mjs', import.meta.url)).toString('base64')}`);
-assert.equal((await isolated.decide(normal)).decision, 'allow');
+assert.equal((await isolated.decide(normal)).decision, 'deny');
 assert.equal((await isolated.decide({ ...normal, subjectId: 'other_learner_fixture' })).decision, 'deny');
 assert.equal((await isolated.decide({ ...normal, path: '/notes/export' })).decision, 'deny');
 for (const [path, route, method, expected] of [
-  ['/notes/demo', 'GET /notes/:id', 'GET', 'allow'],
-  ['/notes/demo', 'PUT /notes/:id', 'PUT', 'allow'],
+  ['/notes/demo', 'GET /notes/:id', 'GET', 'deny'],
+  ['/notes/demo', 'PUT /notes/:id', 'PUT', 'deny'],
   [`/notes/${id}`, 'GET /notes/:id', 'GET', 'deny'],
   [`/notes/${id}`, 'PUT /notes/:id', 'PUT', 'deny'],
   ['/notes/export', 'GET /notes/:id', 'GET', 'deny'],

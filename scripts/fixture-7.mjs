@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const request = (signals, recentEvents) => ({
   schema: 'aleph.decision.v1', requestId: randomUUID(), classId: 'class_fixture',
   projectId: 'project_fixture', subjectId: 'learner_fixture', deviceId: 'a'.repeat(16),
-  service: 'notes', method: 'GET', path: '/notes/demo', route: 'GET /notes/:id',
+  service: 'notes', method: 'GET', path: '/notes/00000000-0000-4000-8000-000000000001', route: 'GET /notes/:id',
   queryLength: 0, querySha256: createHash('sha256').update('').digest('hex'),
   at: new Date().toISOString(), policyRevision: 1, deviceRegistered: true,
   stepUp: { verified: false, authAgeSeconds: null }, recentEvents, signals,
@@ -18,6 +18,11 @@ export function fixtureRequests() {
       [{ kind: 'risk_signal', ageSeconds: 60, count: 20 }]),
   };
 }
+// 로컬 검증 전용 권한입니다. 프로덕션 판정기에는 연습 사용자나 자동 허용 규칙을 넣지 않습니다.
+export function fixtureGrant(request) {
+  return { ...Object.fromEntries(['classId','projectId','subjectId','deviceId','service','method','path','route']
+    .map(key=>[key,request[key]])), expiresAt:new Date(Date.now()+60000).toISOString() };
+}
 const check = (input, output) => output && typeof output === 'object'
   && Object.keys(output).sort().join(',') === 'decision,reasonCode,requestId,ruleIds,schema'
   && output.schema === 'aleph.decision.v1' && output.requestId === input.requestId
@@ -27,7 +32,8 @@ const check = (input, output) => output && typeof output === 'object'
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const { normal, suspicious } = fixtureRequests();
-    const { decide } = await import('../src/decider.mjs');
+    const { createDecider } = await import('../src/decider.mjs');
+    const decide = createDecider([fixtureGrant(normal)]);
     if (typeof decide !== 'function') throw new Error('src/decider.mjs에서 decide 함수를 내보내야 합니다.');
     const ordinary = await decide(normal);
     const unusual = await decide(suspicious);

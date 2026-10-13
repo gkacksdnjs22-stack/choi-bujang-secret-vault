@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { decide, RULE_IDS } from '../src/decider.mjs';
-import { fixtureRequests } from './fixture-7.mjs';
+import { createDecider, RULE_IDS } from '../src/decider.mjs';
+import { fixtureRequests, fixtureGrant } from './fixture-7.mjs';
 
 const { normal, suspicious } = fixtureRequests();
+const decide = createDecider([fixtureGrant(normal)]);
 let count = 0;
 async function check(request, decision, reasonCode) {
   const result = await decide(request);
