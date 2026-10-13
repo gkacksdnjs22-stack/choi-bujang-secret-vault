@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {detect,detectDeviceEvents} from '../src/detect.mjs';
+import {runRuleCheck} from '../src/rule-check.mjs';
+const start=Date.UTC(2026,9,1);
+const reads=(n,patch={})=>Array.from({length:n},(_,i)=>({at:new Date(start+i*2000).toISOString(),method:'GET',subjectId:'virtual_A',deviceId:'a'.repeat(16),decision:'allow',network:'unusual',source:'local_virtual_fixture',...patch}));
+const observe={action:'observe'};
+let count=0;
+const check=(events,expected)=>{const snapshot=structuredClone(events);assert.deepEqual(detectDeviceEvents(events),expected);assert.deepEqual(events,snapshot);count++;};
+const proposal={action:'propose_revocation',reasonCode:'burst_read',subject:'virtual_A',deviceId:'a'.repeat(16)};
+check(reads(120),observe);check(reads(121),proposal);check(reads(121).reverse(),proposal);
+check(reads(121,{network:'usual'}),observe);check(reads(30),observe);
+check(reads(121,{method:'PUT'}),observe);check(reads(121,{decision:'deny'}),observe);
+check(reads(121,{source:'browser'}),observe);check(reads(121,{deviceId:'unknown'}),observe);
+check([...reads(100),...reads(100,{deviceId:'b'.repeat(16)})],observe);
+check([...reads(100),...reads(100,{subjectId:'virtual_B'})],observe);
+const expiredNetwork=reads(121,{network:'usual'});
+expiredNetwork.unshift({...reads(1)[0],at:new Date(start-600000).toISOString()});
+check(expiredNetwork,observe);
+const legacy=Array.from({length:121},(_,i)=>({at:new Date(start+i*5000).toISOString(),method:'GET',identity:{sub:'virtual_A'}}));
+assert.deepEqual(detect(legacy),observe);count++;
+assert.deepEqual(detect(legacy.map(e=>({...e,method:'PUT'}))),observe);count++;
+// 기기 회수는 로컬 집행 모델만 시험하며 실제 등록부는 변경하지 않습니다.
+const revoked=new Set();const detected=detectDeviceEvents(reads(121));revoked.add(detected.deviceId);
+const mayEnter=(device)=>!revoked.has(device);
+assert.equal(mayEnter('a'.repeat(16)),false);assert.equal(mayEnter('b'.repeat(16)),true);
+for(const resource of ['notes','announcements']) assert.equal(mayEnter('a'.repeat(16)),false);
+assert.equal(mayEnter('a'.repeat(16)),false); // 남은 세션도 같은 기기 회수 상태를 확인
+for(const id of ['s09-burst-read','s09-device-compound']) assert.equal((await runRuleCheck(id)).ready,true);
+const standalone=await import('data:text/javascript;base64,'+readFileSync(new URL('../src/detect.mjs',import.meta.url)).toString('base64'));
+assert.deepEqual(standalone.detectDeviceEvents(reads(121)),proposal);
+console.log('9단계 경계 '+count+'건, 입력 불변, 사용자·기기 분리, 가상 회수 모델, 공개 점검·단독 실행 통과. 실제 회수 미실행.');

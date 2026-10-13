@@ -1,4 +1,5 @@
 import { createEngineDecision } from './engine-resource-policy.mjs';
+import {detect,detectDeviceEvents} from './detect.mjs';
 
 // 공개 점검은 이 고정 가상 DB만 사용합니다. 실제 사용자/메모/등록부를 읽거나 수정하지 않습니다.
 const noteId = '00000000-0000-4000-8000-000000000001';
@@ -29,6 +30,16 @@ export function ruleFixture() {
 }
 
 export async function runRuleCheck(caseId) {
+  if(caseId==='s09-burst-read'||caseId==='s09-device-compound') {
+    const start=Date.UTC(2026,9,1);
+    const events=Array.from({length:121},(_,i)=>({at:new Date(start+i*2000).toISOString(),
+      method:'GET',identity:{sub:'check_user'}}));
+    const result=caseId==='s09-burst-read'?detect(events):detectDeviceEvents(events.map(event=>({
+      at:event.at,method:event.method,subjectId:'check_user',deviceId:'a'.repeat(16),
+      source:'local_virtual_fixture',decision:'allow',network:'unusual'})));
+    return {source:'fixed_virtual_fixture',caseId,ready:result.action==='propose_revocation',
+      action:result.action,reasonCode:result.reasonCode};
+  }
   const {request,db,config} = ruleFixture();
   const decision = createEngineDecision({db,config});
   const other = {...request,subjectId:'check_B'};

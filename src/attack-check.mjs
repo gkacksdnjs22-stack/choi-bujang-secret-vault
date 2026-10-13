@@ -14,13 +14,13 @@ export async function runAttackChecks(config) {
   const zone = await fetch(new URL('/api/announcements',app),{redirect:'error',signal:AbortSignal.timeout(10000),
     alephEvidence:{caseId:'s08-other-zone',requestKey:'read'}});
   attempts.push({attackId:'s08-other-zone',expected:'무로그인 공지 API 거부 (인증된 타인 소유권 점검은 별도)',observed:`HTTP ${zone.status}`});
-  for (const caseId of ['s06-unregistered','s07-compound','s08-own','s08-ownership','s08-unknown-route','s08-all-notes','s08-write-notice']) {
+  for (const caseId of ['s06-unregistered','s07-compound','s08-own','s08-ownership','s08-unknown-route','s08-all-notes','s08-write-notice','s09-burst-read','s09-device-compound']) {
     const response = await fetch(new URL('/api/checks?case='+caseId,app),{redirect:'error',signal:AbortSignal.timeout(10000),
       alephEvidence:{caseId,requestKey:'read'}});
     let result;
     try {result=await response.json();} catch {result=null;}
     attempts.push({attackId:caseId,expected:'고정 가상 DB에서 정상 허용과 구역/기기/위험 규칙 검증 (실제 계정 시험 아님)',
-      observed:`HTTP ${response.status}; virtualReady=${result?.source==='fixed_virtual_fixture'&&result?.ready===true}; decisions=${result?.checks?.map(item=>item.decision).join(',')??'unavailable'}`});
+      observed:`HTTP ${response.status}; virtualReady=${result?.source==='fixed_virtual_fixture'&&result?.ready===true}; decisions=${result?.checks?.map(item=>item.decision).join(',')??result?.action??'unavailable'}`});
   }
   return attempts;
 }
