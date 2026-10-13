@@ -85,10 +85,10 @@
     {
       "service": "notes",
       "method": "POST",
-      "pathPattern": "/api/restore/:noteId",
+      "pathPattern": "/api/restore/:id",
       "zone": "my-notes"
     }
   ],
   "originalApiUrl": "https://mhcjrsyvngiokcoljeet.supabase.co/rest/v1/notes",
-  "restoreRoute": "/api/restore/:noteId"
+  "restoreRoute": "/api/restore/:id"
 }
