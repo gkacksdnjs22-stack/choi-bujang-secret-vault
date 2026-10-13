@@ -38,12 +38,30 @@ assert.deepEqual(Object.keys(summary).sort(),['checkedAt','commit','total','bloc
 const source=await readFile(new URL('../public/operations.mjs',import.meta.url),'utf8');
 const elements=new Map();const el=id=>{if(!elements.has(id))elements.set(id,{append(){},textContent:'',disabled:false});return elements.get(id);};
 const context=vm.createContext({document:{getElementById:el,createElement:()=>({})},
-  createProtectedFetch:()=>()=>{},fetch:async()=>new Response(JSON.stringify({...summary,blocked:10,failed:3}),{status:200}),console});
-await vm.runInContext(source.replace(/^import .*;\r?\n/,'' )+'\nloadReceipt();',context);
-assert.match(el('receipt').textContent,/10/);assert.match(el('receipt').textContent,/3/);assert.match(el('receipt').textContent,/0/);assert.match(el('official').textContent,/41/);
-assert.match(el('official').textContent,/미수신/);
+  createProtectedFetch:()=>()=>{},fetch:async()=>new Response(JSON.stringify({...summary,blocked:summary.total-3,failed:3}),{status:200}),console});
+await vm.runInContext(source.replace(/^import .*;\r?\n/,'' ).replace(/\r?\nloadReceipt\(\);\s*$/,'')+'\nloadReceipt();',context);
+assert.match(el('receipt').textContent,new RegExp('차단 조건 확인: '+(summary.total-3)));assert.match(el('receipt').textContent,/조건 불충족: 3/);assert.match(el('receipt').textContent,/미실행: 0/);
+assert.match(el('receiptSource').textContent,/artifacts\/submission.json/);
+assert.match(el('receiptSource').textContent,new RegExp(summary.commit));
+context.fetch=async()=>new Response(JSON.stringify({...summary,total:41,blocked:0,failed:0,notRun:41}));
+await el('scopeRefresh').onclick();
+assert.match(el('receipt').textContent,/점검 항목: 41/);assert.match(el('receipt').textContent,/차단 조건 확인: 0/);
+assert.match(el('receipt').textContent,/미실행: 41/);assert.match(el('receiptSource').textContent,/항목: 41건/);
 context.fetch=async()=>new Response('{}',{status:503});await vm.runInContext('loadReceipt()',context);
 assert.equal(el('receipt').textContent.includes('20'),false);
+assert.match(el('receiptSource').textContent,/확인 실패/);assert.equal(el('receiptSource').textContent.includes(summary.commit),false);
+assert.equal(el('scopeRefresh').disabled,false);
+context.fetch=async()=>new Response(JSON.stringify({...summary,blocked:41}));await el('receiptRefresh').onclick();
+assert.match(el('receipt').textContent,/읽지 못했습니다/);
+context.fetch=async()=>new Response(JSON.stringify({...summary,commit:'invalid'}));await el('scopeRefresh').onclick();
+assert.match(el('receiptSource').textContent,/확인 실패/);
+let resolveFetch;
+context.fetch=()=>new Promise(resolve=>{resolveFetch=resolve;});
+const pending=vm.runInContext('loadReceipt()',context);
+assert.match(el('receipt').textContent,/조회 중/);assert.equal(el('receipt').textContent.includes('점검 항목:'),false);
+assert.equal(el('receiptRefresh').disabled,true);assert.equal(el('scopeRefresh').disabled,true);
+resolveFetch(new Response(JSON.stringify(summary)));await pending;
+assert.match(el('receipt').textContent,new RegExp('점검 항목: '+summary.total));
 console.log('step12: evidence IDs, GET-only, supported observations, failure/not_run accounting and API-to-screen counts passed');
 
 const receiptPath=new URL('../artifacts/submission.json',import.meta.url);

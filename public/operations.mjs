@@ -1,6 +1,5 @@
 import {createProtectedFetch} from './request-proof.mjs';
 const $=id=>document.getElementById(id),signed=createProtectedFetch(()=>({}));
-$('official').textContent='공식 시험 집계 미조회 · 서버 결과를 읽기 전에는 수치를 표시하지 않습니다.';
 async function summary(){
   $('refresh').disabled=true;
   try{
@@ -47,17 +46,24 @@ $('run').onclick=async()=>{
   }catch(error){$('testStatus').textContent='시험 중단 · '+error.message;}finally{$('run').disabled=false;}
 };
 
+let receiptLoading=false;
 async function loadReceipt(){
-  $('receiptRefresh').disabled=true;
+  if(receiptLoading)return;
+  receiptLoading=true;
+  $('receiptRefresh').disabled=true;$('scopeRefresh').disabled=true;
+  $('receipt').textContent='조회 중 · 서버 기록을 다시 읽습니다.';
+  $('receiptSource').textContent='조회 중 · 기록 출처를 확인합니다.';
   try{
     const response=await fetch('/api/checks',{cache:'no-store'}),data=await response.json();
     if(!response.ok||!['total','blocked','failed','notRun'].every(k=>Number.isInteger(data[k])&&data[k]>=0)
       ||data.total!==data.blocked+data.failed+data.notRun
+      ||!Number.isFinite(Date.parse(data.checkedAt))||!/^[a-f0-9]{40}$/.test(data.commit)
 )throw Error('기록 검증 실패');
-    $('receipt').textContent=`실제 읽기 요청 기록 · ${data.checkedAt}\n검사한 커밋: ${data.commit}\n점검 항목: ${data.total}\n차단 조건 확인: ${data.blocked}\n조건 불충족: ${data.failed}\n미실행: ${data.notRun}`;
-    $('official').textContent='공식 41종 개별 결과 미수신 · 미실행 결과를 차단 또는 통과로 집계하지 않습니다.';
-  }catch{$('official').textContent='공식 시험 집계 조회 실패 · 수치를 표시하지 않습니다.';$('receipt').textContent='서버 점검 기록을 읽지 못했습니다. 수치를 표시하지 않습니다.';}
-  finally{$('receiptRefresh').disabled=false;}
+    $('receipt').textContent=`저장된 자기 점검 기록 · ${data.checkedAt}\n검사한 커밋: ${data.commit}\n점검 항목: ${data.total}\n차단 조건 확인: ${data.blocked}\n조건 불충족: ${data.failed}\n미실행: ${data.notRun}`;
+    $('receiptSource').textContent=`조회 경로: /api/checks\n집계 원본: artifacts/submission.json\n기록 시각: ${data.checkedAt}\n검사한 커밋: ${data.commit}\n이 기록에 포함된 항목: ${data.total}건\n범위: 자체 점검의 실행 관측 및 미실행 기록`;
+  }catch{$('receiptSource').textContent='기록 출처 확인 실패 · 이전 집계와 출처를 표시하지 않습니다.';$('receipt').textContent='서버 점검 기록을 읽지 못했습니다. 수치를 표시하지 않습니다.';}
+  finally{receiptLoading=false;$('receiptRefresh').disabled=false;$('scopeRefresh').disabled=false;}
 }
 $('receiptRefresh').onclick=loadReceipt;
+$('scopeRefresh').onclick=loadReceipt;
 loadReceipt();
