@@ -28,5 +28,12 @@ export async function runAttackChecks(config) {
       attempts.push({attackId:`s10_restore_${method.toLowerCase()}`,expected:method==='POST'?'무로그인 복구 401 거부':'복구 경로의 GET 405 거부',observed:`HTTP ${result.status}`});
     }
   }
+  if(config.step>=11){
+    const manifestResponse=await fetch(new URL('/manifest.webmanifest',app),{redirect:'error',signal:AbortSignal.timeout(10000)});
+    let manifest;try{manifest=await manifestResponse.json();}catch{manifest=null;}
+    attempts.push({attackId:'s11-manifest',expected:'설치형 웹앱 manifest 공개',observed:`HTTP ${manifestResponse.status}; standalone=${manifest?.display==='standalone'}; icons=${manifest?.icons?.length??0}`});
+    const deviceResponse=await fetch(new URL('/api/device',app),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',redirect:'error',signal:AbortSignal.timeout(10000)});
+    attempts.push({attackId:'s11-anonymous-approval',expected:'무로그인 기기 승인 신청 거부',observed:`HTTP ${deviceResponse.status}`});
+  }
   return attempts;
 }
