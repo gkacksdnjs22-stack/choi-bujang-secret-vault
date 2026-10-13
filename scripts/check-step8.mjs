@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { decide } from '../src/decider.mjs';
 import { fixtureRequests } from './fixture-7.mjs';
 import { apiResourceTarget } from '../src/resource-routes.mjs';
 const id = '00000000-0000-4000-8000-000000000001';
 const { normal } = fixtureRequests();
+const isolated = await import(`data:text/javascript;base64,${readFileSync(new URL('../src/decider.mjs', import.meta.url)).toString('base64')}`);
+assert.equal((await isolated.decide(normal)).decision, 'allow');
+assert.equal((await isolated.decide({ ...normal, path: '/notes/export' })).decision, 'deny');
 for (const [path, route, method, expected] of [
   [`/notes/${id}`, 'GET /notes/:id', 'GET', 'allow'],
   [`/notes/${id}`, 'PUT /notes/:id', 'PUT', 'allow'],

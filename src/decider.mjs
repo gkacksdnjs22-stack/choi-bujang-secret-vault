@@ -1,8 +1,26 @@
 // ALEPH SDP 엔진이 확인한 요청만 받는 학생 판정기 시작점입니다.
 // 신원·기기·경로의 선행 검사는 엔진이 담당합니다.
 // 요청 본문의 userId, role, 기기 키, 토큰을 별도로 믿거나 저장하지 마세요.
-import { permittedResourceRoute } from './resource-routes.mjs';
 export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'resource_zone']);
+
+// 판정 파일은 외부 모듈 없이도 실행됩니다. 공식 연습의 demo 자료 ID도 보존합니다.
+function permittedResourceRoute(request) {
+  if (request.service !== 'notes' || typeof request.subjectId !== 'string' || !request.subjectId
+      || !/^[a-f0-9]{16}$/.test(request.deviceId ?? '')) return false;
+  const { method, path, route } = request;
+  if (path === '/notes') return ['GET', 'POST'].includes(method) && route === `${method} /notes`;
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (typeof path === 'string' && path.startsWith('/notes/')) {
+    const id = path.slice('/notes/'.length);
+    return (uuid.test(id) || id === 'demo')
+      && ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} /notes/:id`;
+  }
+  // 강사 역할 계약이 없으므로 공지 쓰기는 거부하고 API에서 실제 권한을 다시 확인합니다.
+  if (path === '/announcements') return method === 'GET' && route === 'GET /announcements';
+  return typeof path === 'string' && path.startsWith('/announcements/')
+    && uuid.test(path.slice('/announcements/'.length))
+    && method === 'GET' && route === 'GET /announcements/:id';
+}
 
 // 가상 신호만 평가합니다. 실제 source:none의 unknown 값을 정상 위치로 바꾸지 않습니다.
 function requiresStepUp(request) {
