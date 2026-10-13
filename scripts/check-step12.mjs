@@ -33,7 +33,7 @@ assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{result:'blocked',
 assert.throws(()=>summarizeChecks({...receipt,checkedAt:'invalid'}));
 assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s11-manifest',result:'blocked',observed:'HTTP 200'}]}));
 assert.throws(()=>summarizeChecks({...receipt,attackAttempts:[{attackId:'s08-own',result:'blocked',observed:'HTTP 200; jsonReady=true'}]}));
-assert.deepEqual([summary.officialTests.total,summary.officialTests.executed,summary.officialTests.blocked,summary.officialTests.notRun],[41,0,0,41]);
+assert.deepEqual(Object.keys(summary).sort(),['checkedAt','commit','total','blocked','notRun','failed'].sort());
 // Render exactly the API counts, including unexpected failures; no guessed totals.
 const source=await readFile(new URL('../public/operations.mjs',import.meta.url),'utf8');
 const elements=new Map();const el=id=>{if(!elements.has(id))elements.set(id,{append(){},textContent:'',disabled:false});return elements.get(id);};
@@ -41,7 +41,7 @@ const context=vm.createContext({document:{getElementById:el,createElement:()=>({
   createProtectedFetch:()=>()=>{},fetch:async()=>new Response(JSON.stringify({...summary,blocked:10,failed:3}),{status:200}),console});
 await vm.runInContext(source.replace(/^import .*;\r?\n/,'' )+'\nloadReceipt();',context);
 assert.match(el('receipt').textContent,/10/);assert.match(el('receipt').textContent,/3/);assert.match(el('receipt').textContent,/0/);assert.match(el('official').textContent,/41/);
-assert.match(el('official').textContent,/차단 0/);
+assert.match(el('official').textContent,/미수신/);
 context.fetch=async()=>new Response('{}',{status:503});await vm.runInContext('loadReceipt()',context);
 assert.equal(el('receipt').textContent.includes('20'),false);
 console.log('step12: evidence IDs, GET-only, supported observations, failure/not_run accounting and API-to-screen counts passed');
@@ -69,3 +69,17 @@ try{
  await writeFile(receiptPath,'{}');assert.equal((await call()).code,503);
  console.log('step12: stored receipt API, invalid receipt, read-only and existing virtual-case boundaries passed');
 }finally{if(previous)await writeFile(receiptPath,previous);else await rm(receiptPath,{force:true});}
+
+// The public root uses the official sample's semantic count slots, including all-unrun.
+const receiptUI=await readFile(new URL('../public/receipt.mjs',import.meta.url),'utf8');
+const cells=['total','blocked','failed','notRun'].map(k=>({dataset:{k},textContent:'-'}));
+const meta={textContent:''};
+const rootContext=vm.createContext({document:{querySelectorAll:()=>cells,getElementById:()=>meta},fetch:async()=>new Response(JSON.stringify(summary))});
+await vm.runInContext(receiptUI+'\nloadOps();',rootContext);
+assert.deepEqual(cells.map(c=>c.textContent),['13','13','0','0']);
+rootContext.fetch=async()=>new Response(JSON.stringify({...summary,blocked:0,notRun:13}));
+await vm.runInContext('loadOps()',rootContext);
+assert.deepEqual(cells.map(c=>c.textContent),['13','0','0','13']);
+rootContext.fetch=async()=>new Response('{}',{status:503});await vm.runInContext('loadOps()',rootContext);
+assert.deepEqual(cells.map(c=>c.textContent),['-','-','-','-']);
+console.log('step12: official root count slots, all-unrun and unavailable record display passed');

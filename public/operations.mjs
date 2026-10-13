@@ -53,11 +53,9 @@ async function loadReceipt(){
     const response=await fetch('/api/checks',{cache:'no-store'}),data=await response.json();
     if(!response.ok||!['total','blocked','failed','notRun'].every(k=>Number.isInteger(data[k])&&data[k]>=0)
       ||data.total!==data.blocked+data.failed+data.notRun
-      ||!data.officialTests||data.officialTests.total!==41||data.officialTests.executed!==0
-      ||data.officialTests.blocked!==0||data.officialTests.failed!==0||data.officialTests.notRun!==41)throw Error('기록 검증 실패');
-    $('receipt').textContent=`실제 읽기 요청 기록 · ${data.checkedAt}\n검사한 커밋: ${data.commit}\n점검 항목: ${data.total}\n차단 조건 확인: ${data.blocked}\n조건 불충족: ${data.failed}\n미실행: ${data.notRun}\n출처: ${data.source}`;
-  const official=data.officialTests;
-    $('official').textContent=`공식 ${official.total}종 · 실행 ${official.executed} · 차단 ${official.blocked} · 불충족 ${official.failed} · 미실행 ${official.notRun} · 개별 결과 미수신`;
+)throw Error('기록 검증 실패');
+    $('receipt').textContent=`실제 읽기 요청 기록 · ${data.checkedAt}\n검사한 커밋: ${data.commit}\n점검 항목: ${data.total}\n차단 조건 확인: ${data.blocked}\n조건 불충족: ${data.failed}\n미실행: ${data.notRun}`;
+    $('official').textContent='공식 41종 개별 결과 미수신 · 미실행 결과를 차단 또는 통과로 집계하지 않습니다.';
   }catch{$('official').textContent='공식 시험 집계 조회 실패 · 수치를 표시하지 않습니다.';$('receipt').textContent='서버 점검 기록을 읽지 못했습니다. 수치를 표시하지 않습니다.';}
   finally{$('receiptRefresh').disabled=false;}
 }

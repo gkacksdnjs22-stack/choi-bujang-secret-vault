@@ -12,6 +12,5 @@ export function summarizeChecks(receipt) {
   const blocked=attempts.filter(a=>a.result==='blocked').length;
   const notRun=attempts.filter(a=>a.result==='not_run').length;
   return {checkedAt:receipt.checkedAt,commit:receipt.commit,total:attempts.length,blocked,notRun,
-    failed:attempts.length-blocked-notRun,source:'deployment_read_only_receipt',
-    officialTests:{total:41,executed:0,blocked:0,failed:0,notRun:41,source:'official_individual_results_not_received'}};
+    failed:attempts.length-blocked-notRun};
 }
