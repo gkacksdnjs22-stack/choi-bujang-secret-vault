@@ -16,7 +16,13 @@ export function buildDenyRules(alerts, decisions, { now = Date.now(), ttlMs = 15
   if (!Number.isFinite(now) || !Number.isFinite(ttlMs) || ttlMs <= 0 || ttlMs > 3600_000) {
     throw new TypeError('invalid_rule_lifetime');
   }
-  const byId = new Map(alerts.map(a => [a.id, a]));
+  if(!Array.isArray(alerts)||!Array.isArray(decisions))throw new TypeError('invalid_rule_input');
+  const byId = new Map();
+  for(const alert of alerts){
+    if(!alert||typeof alert.id!=='string'||!/^[\w-]{1,80}$/u.test(alert.id)||byId.has(alert.id))
+      throw new TypeError('invalid_alert_identity');
+    byId.set(alert.id,alert);
+  }
   return decisions.filter(d => d.action === 'block' && d.confidence >= 0.85).map(d => {
     const alert = byId.get(d.alertId);
     const address = alert?.data?.srcip;

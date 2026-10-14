@@ -8,7 +8,7 @@ function safeText(value) {
   return value.replace(/\bBearer\s+\S+/giu, '[REDACTED]')
     .replace(/\beyJ[\w-]+\.[\w-]+\.[\w-]+\b/gu, '[REDACTED]')
     .replace(/\b(?:sb_secret_|sk-)[\w-]+/gu, '[REDACTED]')
-    .replace(/((?:password|passwd|token|secret|api[_ -]?key|비밀번호|토큰|비밀키)\s*[:=]\s*)\S+/giu, '$1[REDACTED]')
+    .replace(/(["']?(?:password|passwd|token|secret|api[_ -]?key|비밀번호|토큰|비밀키)["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;}]+)/giu, '$1[REDACTED]')
     .replace(/-----BEGIN [^-]*PRIVATE KEY-----[\s\S]*?-----END [^-]*PRIVATE KEY-----/gu, '[REDACTED]');
 }
 

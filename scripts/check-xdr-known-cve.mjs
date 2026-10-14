@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFile,mkdtemp} from 'node:fs/promises';
+import {readFile,writeFile,mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -20,6 +20,12 @@ assert.ok(rows.every(row=>Object.keys(row).sort().join()==='account,description,
 const masked=extractAlerts({schema:fixture.schema,moduleKey:fixture.moduleKey,alerts:[{
   timestamp:'time',rule:{level:6,description:'token=sample-sensitive-value'},data:{srcuser:'password=sample-sensitive-value'}}]});
 assert.equal(JSON.stringify(masked).includes('sample-sensitive-value'),false);
+for(const description of ['{"token": "sample-sensitive-value with spaces"}',
+  "api_key='sample-sensitive-value with spaces'",'password = "sample-sensitive-value\\\" escaped"']){
+  const safe=extractAlerts({schema:fixture.schema,moduleKey:fixture.moduleKey,alerts:[{rule:{description}}]});
+  assert.equal(JSON.stringify(safe).includes('sample-sensitive-value'),false);
+  assert.equal(JSON.stringify(safe).includes('with spaces'),false);
+}
 const source=await readFile(new URL('../xdr/known-cve/decide.mjs',import.meta.url),'utf8');
 assert.equal(/^\s*import\b/m.test(source),false);
 assert.equal(/\b(?:fetch|eval|Function|require)\s*\(/.test(source),false);
@@ -54,6 +60,20 @@ await assert.rejects(()=>pipeline.enforce(normal,{sourceAddress:fixture.alerts[0
 assert.equal((await pipeline.enforce(normal,{...context(fixture.alerts[0]),httpObservation:{url:'/health'}})).decision,'allow');
 assert.equal((await pipeline.enforce(normal,{sourceAddress:fixture.alerts[0].data.srcip})).decision,'allow');
 assert.equal((await pipeline.enforce({...normal,srcip:fixture.alerts[0].data.srcip},{})).decision,'deny');
+const normalLog=join(outputDirectory,'normal-only.log');
+await writeFile(normalLog,'existing log\n');
+const normalPipeline=await respond({alerts:fixture.alerts.slice(16),decideBase,outputDirectory,
+  logFile:normalLog,clock:()=>time});
+assert.equal(normalPipeline.rules.length,0);assert.equal(await readFile(normalLog,'utf8'),'existing log\n');
+const duplicateLog=join(outputDirectory,'duplicate-evidence.log');
+const rulesBeforeInvalid=await readFile(join(outputDirectory,'deny-rules.json'),'utf8');
+await assert.rejects(()=>respond({alerts:[fixture.alerts[0],{...fixture.alerts[16],id:fixture.alerts[0].id}],
+  decideBase,outputDirectory,logFile:duplicateLog,clock:()=>time}),/invalid_alert_identity/);
+await assert.rejects(()=>readFile(duplicateLog),{code:'ENOENT'});
+await assert.rejects(()=>respond({alerts:[{...fixture.alerts[8],id:'token=sample-sensitive-value'}],
+  decideBase,outputDirectory,logFile:duplicateLog,clock:()=>time}),/invalid_alert_identity/);
+await assert.rejects(()=>readFile(duplicateLog),{code:'ENOENT'});
+assert.equal(await readFile(join(outputDirectory,'deny-rules.json'),'utf8'),rulesBeforeInvalid);
 assert.equal(pipeline.rules.length,8);
 assert.equal((await readFile(join(outputDirectory,'alerts.log'),'utf8')).trim().split('\n').length,16);
 time+=900001;

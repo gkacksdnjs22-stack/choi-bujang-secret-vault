@@ -11,8 +11,8 @@ export async function respond({ alerts, decideBase, outputDirectory, clock = () 
   const decisions = alerts.map(alert => ({alertId:alert.id,...decide(alert)}));
   const rules = buildDenyRules(alerts, decisions, {now:clock()});
   await mkdir(outputDirectory, {recursive:true});
-  await appendFile(logFile, decisions.filter(d=>d.action!=='record')
-    .map(d=>JSON.stringify(d)).join('\n')+'\n');
+  const notifications=decisions.filter(d=>d.action!=='record').map(d=>JSON.stringify(d));
+  if(notifications.length)await appendFile(logFile,notifications.join('\n')+'\n');
   await writeFile(join(outputDirectory,'deny-rules.json'), JSON.stringify({
     schema:'aleph.xdr.deny-candidates.local.v1',liveConnected:false,rules},null,2)+'\n');
   return { decisions, rules, enforce:createEnforcer({decideBase,rules,now:clock}) };
