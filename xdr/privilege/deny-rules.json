@@ -1,0 +1,87 @@
+{
+  "schema": "aleph.xdr.deny-candidates.local.v1",
+  "liveConnected": false,
+  "rules": [
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "4349507761807fa9843c8b03af2dc81b59f813209506f4dd37d2dfd2aa2b0129",
+      "alertId": "pv-01",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "4349507761807fa9843c8b03af2dc81b59f813209506f4dd37d2dfd2aa2b0129",
+      "alertId": "pv-02",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "96223cc3d4446392901ca50b599251fe798029426fd4a7d4fa583f9b6225ccc6",
+      "alertId": "pv-03",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "393e95cf87d375426bb8c5bb15f7ed425f6fc468a98dbaa51b3f06d77c580505",
+      "alertId": "pv-04",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "b4943fb9621715cb4428f58d27aaf2238d535a64498c6c4577cf5cb9de2c9c02",
+      "alertId": "pv-05",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "a75f413fc41b39b75f99df16eabdd5dbaf72a19a84461e3a778fde5463a74cc1",
+      "alertId": "pv-06",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "494c9bc7de858dd911fdbc34771122c9b16cf888958820aeb490e7ad208c638f",
+      "alertId": "pv-07",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "a22e720fe36579b73e0a14f65f5dba6638001c09cef0e8a929332476813dd6b1",
+      "alertId": "pv-08",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    },
+    {
+      "ruleId": "xdr_privilege",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "subjectId": "56070576083cdee35932dd788ee8285bac3604668c24214cbbc7f4e86e67aa38",
+      "alertId": "pv-09",
+      "createdAt": "2026-10-14T00:51:29.768Z",
+      "expiresAt": "2026-10-14T01:06:29.768Z"
+    }
+  ]
+}

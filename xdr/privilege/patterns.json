@@ -1,0 +1,13 @@
+{
+  "moduleKey":"privilege",
+  "patterns":[
+    {"name":"unusual_admin_membership","condition":"수준10 이상이며 관리자 그룹 원격 추가, 다수 계정 편입, 또는 짧은 재편입의 복합 경보","evidence":"T1078은 도용된 정상 계정의 권한 악용을 다루며 과제의 비정상 관리자 그룹 변경을 그 탐지 신호로 봅니다.","source":"https://attack.mitre.org/techniques/T1078/"},
+    {"name":"new_admin_execution","condition":"수준10 이상이며 방금 승격되거나 평범한 계정이 관리자 그룹에 들어간 뒤 권한 명령을 실행","evidence":"T1068은 낮은 권한에서 높은 권한으로 상승하는 악용을 다룹니다. 경보의 상승·실행 조합은 탐지 신호이지 특정 취약점 악용의 확증은 아닙니다.","source":"https://attack.mitre.org/techniques/T1068/"},
+    {"name":"unusual_hours_execution","condition":"수준10 이상이며 업무 밖 관리자 명령에 낯선 주소 또는 관리자 그룹 추가가 결합","evidence":"T1078은 정상 계정 악용 탐지를 위해 평소와 다른 계정 활동을 살피며 시간 하나만으로 도용을 확정하지 않습니다.","source":"https://attack.mitre.org/techniques/T1078/"},
+    {"name":"changed_session_authority","condition":"수준10 이상이며 낯선 주소에서 관리자 세션으로 변경되거나 다른 계정 권한으로 관리자 명령 실행","evidence":"T1068/T1078의 권한 상승·계정 악용과 관련된 신호를 함께 보며 경보만으로 특정 실행 방법을 단정하지 않습니다.","sources":["https://attack.mitre.org/techniques/T1068/","https://attack.mitre.org/techniques/T1078/"]},
+    {"name":"possible_privilege_change","condition":"수준5 이상 권한·그룹 변경 또는 관리자 명령 경보가 있으나 강한 복합 신호가 불충분","evidence":"그룹 변경·관리 명령은 정상 운영에도 필요하므로 불완전한 T1068/T1078 관련 신호는 알림으로 남깁니다.","sources":["https://attack.mitre.org/techniques/T1068/","https://attack.mitre.org/techniques/T1078/"]},
+    {"name":"normal_event","condition":"평소 로그인·읽기·관리 작업이며 권한 상승을 나타내는 복합 신호나 중간 수준 경보가 없음","evidence":"T1078의 정상 계정 악용은 단순한 로그인이나 읽기 이벤트의 존재만으로 확인되지 않습니다.","source":"https://attack.mitre.org/techniques/T1078/"}
+  ],
+  "thresholds":{"block":0.85,"alert":0.5},
+  "thresholdSource":"0.85/0.5는 과제 지정, 나머지 확신도와 수준 조합은 로컬 정책이며 MITRE가 정한 수치가 아닙니다."
+}
