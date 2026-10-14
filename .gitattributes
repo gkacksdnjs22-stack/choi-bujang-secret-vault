@@ -1,0 +1,2 @@
+# Preserve the official fixture bytes across Windows and Linux checkouts.
+xdr/fixtures/known-cve.json -text

@@ -1,0 +1,70 @@
+{
+  "schema": "aleph.xdr.deny-candidates.local.v1",
+  "liveConnected": false,
+  "rules": [
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "kc-01",
+      "requestFingerprint": "b5c34711940aae16dc016132f5b8b83dba054f726fffd485e0e5941fcdd65e18",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "kc-02",
+      "requestFingerprint": "44a96db89199f50d93474b5449ac448f3a59e3c23b0d6cbbfec1a1d366133eb8",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "198.51.100.16",
+      "alertId": "kc-03",
+      "requestFingerprint": "ba4553b26d202d71634c769e1963869bf78d41251197c2a28c7b22ceb4cf2fb6",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "192.0.2.16",
+      "alertId": "kc-04",
+      "requestFingerprint": "564452309a3ffcc346175d44f209e35403248271b7e431d680917ea83032b042",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "203.0.113.24",
+      "alertId": "kc-05",
+      "requestFingerprint": "f58cf3e0f5a49e3e2a16d95614a10b4e82c1d61d906e2a8d05b4b205a78af9ce",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "198.51.100.24",
+      "alertId": "kc-06",
+      "requestFingerprint": "55b40f7b7b10de5abc2c905c31a6be3222fae054a1518dc6134476d4589f41fe",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "192.0.2.24",
+      "alertId": "kc-07",
+      "requestFingerprint": "32772663b8fa3a81dbaceae1d199be95287e3973df19d4ed3532b12173676c44",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    },
+    {
+      "ruleId": "xdr_known_cve",
+      "sourceAddress": "203.0.113.31",
+      "alertId": "kc-08",
+      "requestFingerprint": "7bbb16cc1f6b9d4780dfb38ea0c4e02e725ec4620a41a7b7e7d5eeb9802d784d",
+      "createdAt": "2026-10-14T00:16:32.718Z",
+      "expiresAt": "2026-10-14T00:31:32.718Z"
+    }
+  ]
+}

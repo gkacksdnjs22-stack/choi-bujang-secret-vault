@@ -1,0 +1,26 @@
+{
+  "schema": "aleph.xdr.patterns.local.v1",
+  "moduleKey": "known-cve",
+  "patterns": [
+    {
+      "name": "remote_jndi_request",
+      "condition": "요청 useragent 또는 url에 완전한 원격 JNDI 조회 구문이 있고 Wazuh 규칙 수준이 10 이상이면 확신도 0.95; 구문만 있고 수준이 낮으면 0.7",
+      "evidence": "CVE-2021-44228은 공격자가 제어하는 로그 메시지·인자의 JNDI 원격 조회와 관련되므로 실제 요청 구문을 근거로 삼습니다.",
+      "source": "https://logging.apache.org/security.html#CVE-2021-44228"
+    },
+    {
+      "name": "possible_cve_probe",
+      "condition": "규칙 수준 5 이상이고 요청·설명에 취약점 이름, 조회 형태의 일부, 점검 도구 또는 관련 특이 입력만 있으면 확신도 0.55로 알림; 이 신호만으로 차단하지 않음",
+      "evidence": "MITRE T1190은 공개 서비스에 대한 악용 요청의 관측·상관분석을 다루므로 이름 언급이나 도구 흔적을 악용 성공으로 확정하지 않습니다.",
+      "source": "https://attack.mitre.org/techniques/T1190/"
+    },
+    {
+      "name": "normal_request",
+      "condition": "원격 조회 요청이나 중간 수준의 관련 의심 신호가 없으면 확신도 0.1로 기록",
+      "evidence": "CVE 이름·심각도 하나만으로 정상 조회를 차단하지 않으며 실제 요청 신호가 없으면 차단 근거가 없습니다.",
+      "source": "https://attack.mitre.org/techniques/T1190/"
+    }
+  ],
+  "thresholds": {"block": 0.85, "alert": 0.5},
+  "thresholdSource": "과제에서 지정한 분기 임계값이며, 세부 확신도와 Wazuh 수준 조합은 이 모듈의 로컬 정책입니다."
+}
