@@ -1,0 +1,12 @@
+{
+  "moduleKey": "persistence",
+  "patterns": [
+    {"name":"unsigned_service","condition":"규칙 수준10 이상이며 서명 없는 서비스 생성/실행 파일 변경과 임시 실행 파일 또는 원격 반복 등록 신호가 함께 있음","evidence":"MITRE T1543은 부팅·반복 실행되는 시스템 서비스의 생성과 변경을 지속성 기법으로 설명합니다.","source":"https://attack.mitre.org/techniques/T1543/"},
+    {"name":"unfamiliar_task","condition":"규칙 수준10 이상이며 처음 보는/임의 이름 예약 작업이 임시 실행 파일을 가리킴","evidence":"MITRE T1053은 예약 작업을 이용한 반복 실행을 다룹니다. 정상 백업 작업 이름 하나로 차단하지 않습니다.","source":"https://attack.mitre.org/techniques/T1053/"},
+    {"name":"unexpected_autostart","condition":"규칙 수준10 이상이며 평소 목록에 없는 Startup 프로그램 추가, 새 서비스의 재부팅 지속, 또는 시작 항목과 예약 작업이 같은 임시 파일을 함께 가리킴","evidence":"T1543/T1053의 지속 실행 신호와 보충 근거 T1547.001의 시작 폴더 등록을 함께 봅니다.","sources":["https://attack.mitre.org/techniques/T1543/","https://attack.mitre.org/techniques/T1053/","https://attack.mitre.org/techniques/T1547/001/"]},
+    {"name":"possible_persistence","condition":"규칙 수준5 이상이며 서비스·예약 작업·시작 항목·임시 실행 파일에 관한 변경 신호만 있어 확정하기 어려움","evidence":"서비스와 작업은 정상 운영에도 사용되므로 신호가 불완전한 경우 알림만 남깁니다.","source":"https://attack.mitre.org/techniques/T1543/"},
+    {"name":"normal_event","condition":"강한 지속성 신호와 중간 수준 변경 경보가 없거나 기존 서명된 서비스·평소 작업·읽기만 한 사건","evidence":"서비스/예약 작업의 존재 자체는 악용의 증거가 아니므로 정상 사용은 차단하지 않습니다.","source":"https://attack.mitre.org/techniques/T1053/"}
+  ],
+  "thresholds":{"block":0.85,"alert":0.5},
+  "thresholdSource":"분기 임계값은 과제 지정. 세부 확신도·수준 조합은 로컬 정책이며 MITRE가 정한 숫자가 아닙니다."
+}
