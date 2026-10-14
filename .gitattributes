@@ -2,3 +2,4 @@
 xdr/fixtures/known-cve.json -text
 xdr/fixtures/persistence.json -text
 xdr/fixtures/privilege.json -text
+xdr/fixtures/exfiltration.json -text

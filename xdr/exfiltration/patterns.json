@@ -1,0 +1,13 @@
+{
+  "moduleKey":"exfiltration",
+  "patterns":[
+    {"name":"unfamiliar_bulk_transfer","condition":"수준10 이상이며 처음 보는 목적지로 50MB 이상·자료50건 이상의 전송","evidence":"T1041/T1048의 자료 유출 탐지와 관련해 목적지 변화와 전송량·건수를 함께 봅니다. 크기만으로 악용 통로를 확정하지 않습니다.","sources":["https://attack.mitre.org/techniques/T1041/","https://attack.mitre.org/techniques/T1048/"]},
+    {"name":"unusual_archive_transfer","condition":"수준10 이상, 50MB 이상 압축 파일이 낯선 목적지로 업무 밖 전송되거나 연속·복수 목적지 반출","evidence":"T1041/T1048의 유출 경로에서 반출 신호를 대조하며 압축 파일 생성만으로 유출을 확정하지 않습니다.","sources":["https://attack.mitre.org/techniques/T1041/","https://attack.mitre.org/techniques/T1048/"]},
+    {"name":"repeated_large_transfer","condition":"수준10 이상이며 50MB 이상 전송이 같은 목적지나 명령 통로에서 5회 이상 반복","evidence":"T1041은 기존 명령 통로를 통한 유출을 다룹니다. 반복 큰 전송은 과제의 탐지 신호이며 C2 존재를 새로 입증한 것은 아닙니다.","source":"https://attack.mitre.org/techniques/T1041/"},
+    {"name":"alternate_channel_transfer","condition":"수준10 이상·50MB 이상·자료50건 이상이며 평소와 다른 포트의 연속 전송 또는 자료실 전체 외부 복사","evidence":"T1048은 명령 통로와 다른 프로토콜의 유출을 다룹니다. 이 경보의 다른 포트·전체 반출은 관련 신호이며 프로토콜 자체는 미확정입니다.","source":"https://attack.mitre.org/techniques/T1048/"},
+    {"name":"possible_exfiltration","condition":"수준5 이상 전송·압축·목적지·자료 읽기 변화가 있지만 강한 복합 신호가 불충분","evidence":"T1041/T1048과 관련된 불완전한 신호는 알림으로 남겨 작은 전송·평소 백업을 즉시 차단하지 않습니다.","sources":["https://attack.mitre.org/techniques/T1041/","https://attack.mitre.org/techniques/T1048/"]},
+    {"name":"normal_event","condition":"평소 자료 조회·동기화·저장·세션 확인이며 강한 반출 신호와 중간 수준 경보가 없음","evidence":"일반 자료 통신의 존재 자체는 T1041/T1048의 자료 유출 증거가 아닙니다.","sources":["https://attack.mitre.org/techniques/T1041/","https://attack.mitre.org/techniques/T1048/"]}
+  ],
+  "thresholds":{"block":0.85,"alert":0.5,"largeBytes":50000000,"bulkFiles":50,"repeatCount":5},
+  "thresholdSource":"0.85/0.5는 과제 지정. 50MB/50건/5회·수준·세부 확신도는 로컬 정책이며 MITRE가 정한 수치가 아닙니다."
+}

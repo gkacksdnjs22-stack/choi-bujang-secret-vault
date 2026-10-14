@@ -1,0 +1,96 @@
+{
+  "schema": "aleph.xdr.deny-candidates.local.v1",
+  "liveConnected": false,
+  "rules": [
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "203.0.113.50",
+      "alertId": "ex-01",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "198.51.100.40",
+      "alertId": "ex-02",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "203.0.113.50",
+      "alertId": "ex-03",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "198.51.100.40",
+      "alertId": "ex-04",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "203.0.113.55",
+      "alertId": "ex-05",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "192.0.2.90",
+      "alertId": "ex-06",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "198.51.100.45",
+      "alertId": "ex-07",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "203.0.113.60",
+      "alertId": "ex-08",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "203.0.113.61",
+      "alertId": "ex-09",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    },
+    {
+      "ruleId": "xdr_exfiltration",
+      "classId": "class_fixture",
+      "projectId": "project_fixture",
+      "destinationAddress": "198.51.100.46",
+      "alertId": "ex-10",
+      "createdAt": "2026-10-14T01:05:56.898Z",
+      "expiresAt": "2026-10-14T01:20:56.898Z"
+    }
+  ]
+}
